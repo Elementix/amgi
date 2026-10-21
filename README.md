@@ -86,7 +86,7 @@ server) in the app and sync a collection you already have.
 
 ## Every change from upstream
 
-All changes are in the single commit on `ios17` on top of `63440c5`. Run
+All changes are in the commits on `ios17` on top of `63440c5`. Run
 `git diff 63440c5 ios17` for the exact diff.
 
 ### Deployment target
@@ -99,6 +99,16 @@ All changes are in the single commit on `ios17` on top of `63440c5`. Run
 `scripts/build-xcframework.sh` already built the Rust engine with
 `IPHONEOS_DEPLOYMENT_TARGET=17.0`, so the Rust side didn't change. The watchOS
 and macOS minimums in the package manifests stayed as they were.
+
+### Dependencies that declared a higher minimum
+
+The first CI build stopped before compiling any Swift, because Swift Package
+Manager rejected two dependencies:
+
+| Dependency | Problem | Fix |
+|---|---|---|
+| `Libraries/EPUBKit` (vendored EPUB parser) | `The package product 'AEXML' requires minimum platform version 17.0 for the iOS platform, but this target supports 16.0` | Raised EPUBKit's `.iOS(.v16)` to `.iOS(.v17)`. |
+| [hoshidicts](https://github.com/Manhhao/hoshidicts) (C++ Yomitan dictionary engine, used by the Reader's dictionary lookup) | Its own `Package.swift` declares `.iOS(.v18)`, so no iOS 17 target can depend on it. | New `scripts/vendor-hoshidicts.sh` clones the same pinned revision (`e70589d`) with its submodules into `Libraries/hoshidicts/` (gitignored) and changes that one line to `.iOS(.v17)`. `AmgiReader/Package.swift` now uses `.package(path: "../Libraries/hoshidicts")` instead of the Git URL, and the stale remote pin was removed from `Package.resolved`. hoshidicts' source is unchanged. |
 
 ### iOS 18-only APIs and their replacements
 
@@ -123,6 +133,12 @@ takes its existing pre-iOS-26 fallback.
 - Added a `push` trigger for the `ios17` branch, so every push builds an IPA.
 - Removed the simulator "compatibility smoke check" step to make runs faster.
   The device archive step compiles the same code.
+- Added a **Vendor hoshidicts for iOS 17** step that runs
+  `scripts/vendor-hoshidicts.sh` before the Xcode project is generated.
+- Added a **Report compile errors** step. It runs only when the build fails,
+  and copies each `error:` line from the build log into an annotation. Job
+  logs are visible only to signed-in users, but annotations show on the public
+  run page.
 - Everything else matches upstream: Xcode 26.3 on `macos-26`, Rust 1.95,
   unsigned archive, and an IPA uploaded as a 7-day artifact.
 
@@ -163,6 +179,7 @@ git clone --recursive -b ios17 https://github.com/Elementix/amgi.git
 cd amgi
 ./scripts/build-xcframework.sh            # Rust engine → xcframework
 ./scripts/generate-protos.sh              # protobuf → Swift types
+./scripts/vendor-hoshidicts.sh            # iOS 17 copy of hoshidicts (this fork only)
 cd AmgiApp && xcodegen generate && cd ..  # project is generated, not checked in
 open AmgiApp/AmgiApp.xcodeproj
 ```
@@ -233,7 +250,10 @@ docs cover the rest: [Features](Documentation/FEATURES.md),
 Amgi. It incorporates [ankitects/anki](https://github.com/ankitects/anki)
 (copyright Ankitects Pty Ltd), which is also AGPL-3.0. See [LICENSE](LICENSE).
 The complete source for this port, including all iOS 17 changes, is this
-repository's `ios17` branch.
+repository's `ios17` branch. The Reader's dictionary engine,
+[hoshidicts](https://github.com/Manhhao/hoshidicts), is GPL-3.0. The build
+fetches it from its own repository, and the only change is its minimum iOS
+version.
 
 ## Acknowledgments
 
@@ -244,5 +264,6 @@ From upstream, kept as-is:
 - **[DreamAfar](https://github.com/DreamAfar)**, for the v0.0.3 fork that contributed Image Occlusion, the multi-theme system, the Settings tab, the card template editor, retrievability stats, tag management, the rich note editor, and the GitHub Actions IPA workflow
 - **[AnkiDroid](https://github.com/ankidroid/Anki-Android)**, for pioneering the Rust backend bridge pattern on mobile
 - **[Point-Free](https://www.pointfree.co/)**, for [swift-dependencies](https://github.com/pointfreeco/swift-dependencies)
+- **[Manhhao](https://github.com/Manhhao)**, for [hoshidicts](https://github.com/Manhhao/hoshidicts), the Reader's dictionary engine
 
 iOS 17 port: **Claude** (Anthropic), via Claude Code, for Elementix.

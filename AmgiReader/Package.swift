@@ -61,8 +61,9 @@ let interopSwiftSettings: [SwiftSetting] = [
 
 let package = Package(
     name: "AmgiReader",
-    // iOS 18 / macOS 15 because ReaderDictionary pulls in hoshidicts,
-    // which itself requires macOS 15. The base AmgiReader target is
+    // macOS 15 because ReaderDictionary pulls in hoshidicts, which
+    // itself requires macOS 15. iOS 17 needs the patched local copy of
+    // hoshidicts (see scripts/vendor-hoshidicts.sh). The base AmgiReader target is
     // pure-Swift and would happily run on lower minimums, but SPM
     // platform requirements are per-package, not per-target.
     platforms: [.iOS(.v17), .macOS(.v15)],
@@ -78,13 +79,12 @@ let package = Package(
         // pure-Swift module zip/XML-free.
         .package(path: "../Libraries/EPUBKit"),
         // hoshidicts: Yomitan-compatible offline dictionary engine.
-        // Pin matches DreamAfar's verified revision so we get the same
-        // ABI / generated bindings. C++ interop ships in this dependency,
-        // so its consumer (ReaderDictionary below) needs Cxx mode.
-        .package(
-            url: "https://github.com/Manhhao/hoshidicts.git",
-            revision: "e70589d33b6b346663278383b422e41f1ed05f3c"
-        ),
+        // C++ interop ships in this dependency, so its consumer
+        // (ReaderDictionary below) needs Cxx mode. Upstream's manifest
+        // requires iOS 18, so this points at a local copy of the pinned
+        // revision (e70589d) with the minimum lowered to iOS 17 — run
+        // scripts/vendor-hoshidicts.sh first.
+        .package(path: "../Libraries/hoshidicts"),
         .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.0.0"),
     ],
     targets: [

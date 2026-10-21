@@ -101,6 +101,14 @@ jobs:
           chmod +x ./scripts/generate-protos.sh
           ./scripts/generate-protos.sh
 
+      # ── 8.5. Vendor hoshidicts (iOS 17 port) ─────────────────────
+      # hoshidicts' own manifest requires iOS 18; this clones the pinned
+      # revision and lowers it to iOS 17 for AmgiReader's path dependency.
+      - name: Vendor hoshidicts for iOS 17
+        run: |
+          chmod +x ./scripts/vendor-hoshidicts.sh
+          ./scripts/vendor-hoshidicts.sh
+
       # ── 9. Generate Xcode project ─────────────────────────────────
       - name: Generate Xcode project
         run: |
@@ -141,6 +149,17 @@ jobs:
             exit 1
           fi
           echo "Archive build successful."
+
+      # ── 10.5. Surface compile errors (iOS 17 port) ────────────────
+      # Job logs need a signed-in viewer; annotations don't. Echo each
+      # unique error line as an annotation so the run page shows them.
+      - name: Report compile errors
+        if: failure()
+        run: |
+          [ -f build.log ] || exit 0
+          grep -E '(error|fatal error): ' build.log | sort -u | head -50 | while IFS= read -r line; do
+            echo "::error::${line}"
+          done
 
       # ── 11. Package .app into unsigned .ipa ───────────────────────
       - name: Package .app into unsigned .ipa

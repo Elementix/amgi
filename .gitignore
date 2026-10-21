@@ -7,6 +7,8 @@ AmgiApp/memory/
 DerivedData/
 build/
 AnkiRustLib.xcframework
+# Patched local copy, created by scripts/vendor-hoshidicts.sh
+Libraries/hoshidicts/
 anki-bridge-rs/target/
 anki-upstream/target/
 .claude/
