@@ -182,7 +182,7 @@ struct TemplatePreviewHeader: View {
 
             Picker("Side", selection: $previewSide) {
                 ForEach(CardPreviewSide.allCases, id: \.self) { side in
-                    Text(side.label).tag(side)
+                    Text(side.label).amgiTag(side)
                 }
             }
             .pickerStyle(.segmented)

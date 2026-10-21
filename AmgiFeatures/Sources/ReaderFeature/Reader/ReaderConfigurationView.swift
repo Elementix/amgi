@@ -37,9 +37,9 @@ struct ReaderConfigurationView: View {
                     Text("Loading decks…").foregroundStyle(palette.textSecondary)
                 } else {
                     Picker("Deck", selection: Binding($deckName)) {
-                        Text("Select a deck").tag("")
+                        Text("Select a deck").amgiTag("")
                         ForEach(model.decks, id: \.id) { deck in
-                            Text(deck.name).tag(deck.name)
+                            Text(deck.name).amgiTag(deck.name)
                         }
                     }
                 }

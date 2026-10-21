@@ -8,6 +8,7 @@
 import Reader
 import AppCore
 import Sharing
+import Theme
 package import SwiftUI
 import UniformTypeIdentifiers
 
@@ -136,7 +137,7 @@ package struct ReaderLibraryView: View {
             Menu {
                 Picker("Sort By", selection: sortSelection) {
                     ForEach(BookshelfSortMode.allCases) { mode in
-                        Text(mode.label).tag(mode)
+                        Text(mode.label).amgiTag(mode)
                     }
                 }
                 .pickerStyle(.inline)

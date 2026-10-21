@@ -52,7 +52,7 @@ upstream there.
 | | |
 |---|---|
 | Compiles for iOS 17 | ✅ [CI run 39648940425](https://github.com/Elementix/amgi/actions/runs/39648940425) (2026-10-21, commit `0166091`) built and packaged the unsigned IPA |
-| Tested on a real iOS 17 device | ❌ Not yet |
+| Tested on a real iOS 17 device | ⚠️ First build (`0166091`) launched and ran onboarding on an iPhone 14 Pro (iOS 17.0), then crashed entering the main screen. Fixed in the next build (see [the `.tag()` crash](#the-tag-crash-found-on-device)); waiting on a retest. |
 | Apple Watch app | ❌ Not included (see [What's not included](#whats-not-included)) |
 
 ## Installing (TrollStore / sideloading)
@@ -122,6 +122,34 @@ Manager rejected two dependencies:
 | `AmgiUI/Sources/UI/DeckDetail/DeckHeroTile.swift` | `Color.mix(with:by:in: .perceptual)` | iOS 18 is unchanged. iOS 17 does a linear sRGB blend of the two resolved colors, so deck hero-tile gradients may look slightly different. |
 | Image-occlusion screens, EPUB reader, Study landing | `.toolbarVisibility(_:for:)` | Replaced with the equivalent `.toolbar(_:for:)` (iOS 16+). Same behavior on every version. |
 | `AmgiFeatures/Sources/IntentsFeature/StudyDeckIntent.swift` | `OpenURLIntent` | The **Study Deck** Shortcut used to return `OpenURLIntent(amgi://review?deckId=…)`. It now calls `UIApplication.shared.open` on that URL from inside the app instead. The intent already has `openAppWhenRun = true`, so the app is in the foreground first. This applies on every iOS version. |
+
+### The `.tag()` crash (found on device)
+
+The first build compiled cleanly but crashed on iOS 17 as soon as the main
+tab bar appeared. The crash was `EXC_BAD_ACCESS` at address `0x0`, on a
+SwiftUI AttributeGraph thread that was reading a view's type layout.
+
+Built with the iOS 18+ SDK, every `.tag(_:)` call compiles to
+`ModifiedContent<…, _TagTraitWritingModifier<V>>`. That type doesn't exist in
+iOS 17's SwiftUI: it's missing from the iOS 17.0 and 17.5 SDK symbol lists,
+which only have the older `_TraitWritingModifier`. The compiler doesn't flag
+it, but at runtime its type descriptor resolves to null. SwiftUI crashes on
+any view that contains a `.tag()`, including the iOS 17 tab bar fallback and
+about 70 pickers across Settings, deck options, the Reader and the editors.
+
+Fix: a new `amgiTag(_:)` helper in `AmgiUI/Sources/Theme/AmgiTag.swift`
+replaces every `.tag(_:)` in the iPhone app. It wraps the view in one-element
+`ForEach`es, which SwiftUI tags with their `id` using the running OS's own
+mechanism. It tags with both `V` and `V?`, matching the newer `.tag()`'s
+`includeOptional` behavior, so optional selections keep working. It
+behaves the same on iOS 17, 18 and 26, so no availability check is needed.
+The watch app's `.tag()` calls are untouched, since the watch app isn't built.
+
+How it was found: the crashing build's binary (UUID matched the crash log)
+was checked against Apple's iOS 17.0 SDK symbol lists. 11 symbols referenced
+from Swift type metadata are missing on iOS 17. 9 are the guarded iOS 18/26
+types above, which only appear inside their `#available` branches (erased to
+`AnyView`). One is preview-only. The last was `_TagTraitWritingModifier`.
 
 APIs that are back-deployed and needed no change: `@Entry`,
 `onGeometryChange(for:of:action:)`. Code already behind `#available(iOS 26, *)`

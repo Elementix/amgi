@@ -173,7 +173,7 @@ package struct BrowseView: View {
                         Section {
                             Picker("Sort By", selection: $model.sortOrder) {
                                 ForEach(BrowseSortOrder.allCases, id: \.self) { order in
-                                    Text(order.rawValue).tag(order)
+                                    Text(order.rawValue).amgiTag(order)
                                 }
                             }
                             .pickerStyle(.inline)

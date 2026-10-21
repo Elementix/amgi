@@ -37,7 +37,7 @@ struct CardRenderingSettingsView: View {
                     selection: engineBinding
                 ) {
                     ForEach(CardRenderEngine.allCases, id: \.self) { engine in
-                        Text(engine.displayName).tag(engine)
+                        Text(engine.displayName).amgiTag(engine)
                     }
                 }
             }

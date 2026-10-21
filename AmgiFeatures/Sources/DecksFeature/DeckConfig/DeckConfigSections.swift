@@ -44,7 +44,7 @@ struct PresetSection: View {
                         }
                     )) {
                         ForEach(presetOptions, id: \.config.id) { option in
-                            Text(option.config.name).tag(option.config.id)
+                            Text(option.config.name).amgiTag(option.config.id)
                         }
                     }
                 } label: {
@@ -139,8 +139,8 @@ struct LapsesSection: View {
             }
             Stepper("Leech threshold: \(leechThreshold)", value: $leechThreshold, in: 1...9999)
             Picker("Leech action", selection: $leechAction) {
-                Text("Suspend card").tag(LeechAction.suspend)
-                Text("Tag only").tag(LeechAction.tagOnly)
+                Text("Suspend card").amgiTag(LeechAction.suspend)
+                Text("Tag only").amgiTag(LeechAction.tagOnly)
             }
         }
     }
@@ -157,42 +157,42 @@ struct OrderSection: View {
     var body: some View {
         Section("Order") {
             Picker("New card insert order", selection: $newCardInsertOrder) {
-                Text("Sequential (oldest first)").tag(NewCardInsertOrder.due)
-                Text("Random").tag(NewCardInsertOrder.random)
+                Text("Sequential (oldest first)").amgiTag(NewCardInsertOrder.due)
+                Text("Random").amgiTag(NewCardInsertOrder.random)
             }
             Picker("New gather priority", selection: $newCardGatherPriority) {
-                Text("Deck").tag(NewCardGatherPriority.deck)
-                Text("Deck, then random notes").tag(NewCardGatherPriority.deckThenRandomNotes)
-                Text("Position — lowest first").tag(NewCardGatherPriority.lowestPosition)
-                Text("Position — highest first").tag(NewCardGatherPriority.highestPosition)
-                Text("Random notes").tag(NewCardGatherPriority.randomNotes)
-                Text("Random cards").tag(NewCardGatherPriority.randomCards)
+                Text("Deck").amgiTag(NewCardGatherPriority.deck)
+                Text("Deck, then random notes").amgiTag(NewCardGatherPriority.deckThenRandomNotes)
+                Text("Position — lowest first").amgiTag(NewCardGatherPriority.lowestPosition)
+                Text("Position — highest first").amgiTag(NewCardGatherPriority.highestPosition)
+                Text("Random notes").amgiTag(NewCardGatherPriority.randomNotes)
+                Text("Random cards").amgiTag(NewCardGatherPriority.randomCards)
             }
             Picker("New card sort order", selection: $newCardSortOrder) {
-                Text("Card template, then gather order").tag(NewCardSortOrder.template)
-                Text("Gather order").tag(NewCardSortOrder.noSort)
-                Text("Card template, then random").tag(NewCardSortOrder.templateThenRandom)
-                Text("Random note, then template").tag(NewCardSortOrder.randomNoteThenTemplate)
-                Text("Random").tag(NewCardSortOrder.randomCard)
+                Text("Card template, then gather order").amgiTag(NewCardSortOrder.template)
+                Text("Gather order").amgiTag(NewCardSortOrder.noSort)
+                Text("Card template, then random").amgiTag(NewCardSortOrder.templateThenRandom)
+                Text("Random note, then template").amgiTag(NewCardSortOrder.randomNoteThenTemplate)
+                Text("Random").amgiTag(NewCardSortOrder.randomCard)
             }
             Picker("New/review mix", selection: $newMix) {
-                Text("Mix with reviews").tag(ReviewMix.mixWithReviews)
-                Text("After reviews").tag(ReviewMix.afterReviews)
-                Text("Before reviews").tag(ReviewMix.beforeReviews)
+                Text("Mix with reviews").amgiTag(ReviewMix.mixWithReviews)
+                Text("After reviews").amgiTag(ReviewMix.afterReviews)
+                Text("Before reviews").amgiTag(ReviewMix.beforeReviews)
             }
             Picker("Review order", selection: $reviewOrder) {
-                Text("Mixed by day").tag(ReviewCardOrder.day)
-                Text("Day, then deck").tag(ReviewCardOrder.dayThenDeck)
-                Text("Deck, then day").tag(ReviewCardOrder.deckThenDay)
-                Text("Intervals — ascending").tag(ReviewCardOrder.intervalsAscending)
-                Text("Intervals — descending").tag(ReviewCardOrder.intervalsDescending)
-                Text("Retrievability — descending").tag(ReviewCardOrder.retrievabilityDescending)
-                Text("Random").tag(ReviewCardOrder.random)
+                Text("Mixed by day").amgiTag(ReviewCardOrder.day)
+                Text("Day, then deck").amgiTag(ReviewCardOrder.dayThenDeck)
+                Text("Deck, then day").amgiTag(ReviewCardOrder.deckThenDay)
+                Text("Intervals — ascending").amgiTag(ReviewCardOrder.intervalsAscending)
+                Text("Intervals — descending").amgiTag(ReviewCardOrder.intervalsDescending)
+                Text("Retrievability — descending").amgiTag(ReviewCardOrder.retrievabilityDescending)
+                Text("Random").amgiTag(ReviewCardOrder.random)
             }
             Picker("Interday learning mix", selection: $interdayLearningMix) {
-                Text("Mix with reviews").tag(ReviewMix.mixWithReviews)
-                Text("After reviews").tag(ReviewMix.afterReviews)
-                Text("Before reviews").tag(ReviewMix.beforeReviews)
+                Text("Mix with reviews").amgiTag(ReviewMix.mixWithReviews)
+                Text("After reviews").amgiTag(ReviewMix.afterReviews)
+                Text("Before reviews").amgiTag(ReviewMix.beforeReviews)
             }
         }
     }
@@ -249,15 +249,15 @@ struct AutoAdvanceSection: View {
                 valueText: String(format: "%.1f s", secondsToShowAnswer)
             )
             Picker("After question", selection: $questionAction) {
-                Text("Show answer").tag(QuestionAction.showAnswer)
-                Text("Show reminder").tag(QuestionAction.showReminder)
+                Text("Show answer").amgiTag(QuestionAction.showAnswer)
+                Text("Show reminder").amgiTag(QuestionAction.showReminder)
             }
             Picker("After answer", selection: $answerAction) {
-                Text("Bury card").tag(AnswerAction.buryCard)
-                Text("Answer Again").tag(AnswerAction.answerAgain)
-                Text("Answer Hard").tag(AnswerAction.answerHard)
-                Text("Answer Good").tag(AnswerAction.answerGood)
-                Text("Show reminder").tag(AnswerAction.showReminder)
+                Text("Bury card").amgiTag(AnswerAction.buryCard)
+                Text("Answer Again").amgiTag(AnswerAction.answerAgain)
+                Text("Answer Hard").amgiTag(AnswerAction.answerHard)
+                Text("Answer Good").amgiTag(AnswerAction.answerGood)
+                Text("Show reminder").amgiTag(AnswerAction.showReminder)
             }
         }
     }

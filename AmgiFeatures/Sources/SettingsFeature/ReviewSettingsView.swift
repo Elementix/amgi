@@ -65,8 +65,8 @@ struct ReviewSettingsView: View {
                     tone: .link,
                     selection: Binding($cardContentAlignment)
                 ) {
-                    Text("Center").tag(CardWebViewContentAlignment.center.rawValue)
-                    Text("Top").tag(CardWebViewContentAlignment.top.rawValue)
+                    Text("Center").amgiTag(CardWebViewContentAlignment.center.rawValue)
+                    Text("Top").amgiTag(CardWebViewContentAlignment.top.rawValue)
                 }
             }
         }

@@ -115,7 +115,7 @@ struct AddImageOcclusionContent: View {
             Section("Deck") {
                 Picker("Deck", selection: $model.selectedDeckId) {
                     ForEach(model.decks) { deck in
-                        Text(deck.name).tag(deck.id)
+                        Text(deck.name).amgiTag(deck.id)
                     }
                 }
             }

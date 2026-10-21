@@ -61,7 +61,7 @@ package struct ReaderDictionarySettingsView: View {
                 Toggle("Autoplay audio", isOn: Binding($audioAutoplay))
                 Picker("Playback mode", selection: Binding($audioPlaybackModeRaw)) {
                     ForEach(LookupAudioPlaybackMode.allCases) { mode in
-                        Text(mode.label).tag(mode.rawValue)
+                        Text(mode.label).amgiTag(mode.rawValue)
                     }
                 }
                 VStack(alignment: .leading, spacing: 4) {
@@ -84,9 +84,9 @@ package struct ReaderDictionarySettingsView: View {
 
             Section {
                 Picker("Type", selection: $model.selectedKind) {
-                    Text("Term").tag(AppDictionaryKind.term)
-                    Text("Frequency").tag(AppDictionaryKind.frequency)
-                    Text("Pitch").tag(AppDictionaryKind.pitch)
+                    Text("Term").amgiTag(AppDictionaryKind.term)
+                    Text("Frequency").amgiTag(AppDictionaryKind.frequency)
+                    Text("Pitch").amgiTag(AppDictionaryKind.pitch)
                 }
                 .pickerStyle(.segmented)
             }

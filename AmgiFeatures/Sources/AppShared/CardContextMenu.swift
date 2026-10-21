@@ -44,7 +44,7 @@ public struct CardFlagPicker: View {
                 ForEach(CardFlag.all, id: \.self) { value in
                     Label(CardFlag.name(value), systemImage: CardFlag.symbol(value))
                         .tint(CardFlag.color(value))
-                        .tag(value)
+                        .amgiTag(value)
                 }
             }
             .pickerStyle(.palette)

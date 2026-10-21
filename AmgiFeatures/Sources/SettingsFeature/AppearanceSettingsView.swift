@@ -24,9 +24,9 @@ struct AppearanceSettingsView: View {
             SettingsSectionHeader(title: "Appearance")
             SettingsGroup {
                 Picker("Appearance", selection: $manager.appearance) {
-                    Text("System").tag(Appearance.system)
-                    Text("Light").tag(Appearance.light)
-                    Text("Dark").tag(Appearance.dark)
+                    Text("System").amgiTag(Appearance.system)
+                    Text("Light").amgiTag(Appearance.light)
+                    Text("Dark").amgiTag(Appearance.dark)
                 }
                 .pickerStyle(.segmented)
                 .padding(AmgiSpacing.md)
@@ -40,8 +40,8 @@ struct AppearanceSettingsView: View {
                     tone: .accent,
                     selection: Binding($appFontRaw)
                 ) {
-                    Text("System").tag(AppFont.system.rawValue)
-                    Text("Serif").tag(AppFont.serif.rawValue)
+                    Text("System").amgiTag(AppFont.system.rawValue)
+                    Text("Serif").amgiTag(AppFont.serif.rawValue)
                 }
             }
             SettingsFootnote("Changes the font used throughout the app. Card-template content and hero numbers stay in their own typeface.")

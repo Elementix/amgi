@@ -62,9 +62,9 @@ struct RenderModeSheet: View {
                 if let template {
                     Section {
                         Picker("Override", selection: overrideBinding(for: template)) {
-                            Text("Default").tag(CardRenderEngine?.none)
-                            Text("Native").tag(CardRenderEngine?.some(.alwaysNative))
-                            Text("HTML").tag(CardRenderEngine?.some(.alwaysHTML))
+                            Text("Default").amgiTag(CardRenderEngine?.none)
+                            Text("Native").amgiTag(CardRenderEngine?.some(.alwaysNative))
+                            Text("HTML").amgiTag(CardRenderEngine?.some(.alwaysHTML))
                         }
                     } header: {
                         Text(templateName.map { "Template · \($0)" } ?? "This template")

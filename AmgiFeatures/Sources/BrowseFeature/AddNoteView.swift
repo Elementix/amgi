@@ -85,7 +85,7 @@ struct AddNoteContent: View {
             Section("Deck") {
                 Picker("Deck", selection: $model.selectedDeckId) {
                     ForEach(model.decks) { deck in
-                        Text(deck.name).tag(deck.id)
+                        Text(deck.name).amgiTag(deck.id)
                     }
                 }
             }
@@ -93,7 +93,7 @@ struct AddNoteContent: View {
             Section("Note Type") {
                 Picker("Type", selection: $model.selectedNotetypeId) {
                     ForEach(model.notetypeNames, id: \.id) { entry in
-                        Text(entry.name).tag(entry.id)
+                        Text(entry.name).amgiTag(entry.id)
                     }
                 }
                 .onChange(of: model.selectedNotetypeId) {

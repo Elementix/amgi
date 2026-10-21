@@ -13,6 +13,7 @@ import SettingsFeature
 import StatsFeature
 import SwiftUI
 import SyncFeature
+import Theme
 
 /// Root tab bar. Pure layout: each tab wraps a feature view in a
 /// `NavigationStack`. `refreshID` (bumped by the host after sync / import /
@@ -82,21 +83,21 @@ struct MainTabView: View {
             TabView(selection: $selection) {
                 libraryTab
                     .tabItem { Label("Library", systemImage: "rectangle.stack") }
-                    .tag(MainTab.library)
+                    .amgiTag(MainTab.library)
                 if showReaderTab {
                     readTab
                         .tabItem { Label("Read", systemImage: "book") }
-                        .tag(MainTab.read)
+                        .amgiTag(MainTab.read)
                 }
                 studyTab
                     .tabItem { Label("Study", systemImage: "graduationcap") }
-                    .tag(MainTab.study)
+                    .amgiTag(MainTab.study)
                 statsTab
                     .tabItem { Label("Stats", systemImage: "chart.bar") }
-                    .tag(MainTab.stats)
+                    .amgiTag(MainTab.stats)
                 settingsTab
                     .tabItem { Label("Settings", systemImage: "gearshape") }
-                    .tag(MainTab.settings)
+                    .amgiTag(MainTab.settings)
             }
         }
     }

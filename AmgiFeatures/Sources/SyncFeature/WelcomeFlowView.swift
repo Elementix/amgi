@@ -124,7 +124,7 @@ private extension WelcomeFlowView {
         #if os(iOS)
         TabView(selection: $step) {
             ForEach(steps.indices, id: \.self) { index in
-                page(index).tag(index)
+                page(index).amgiTag(index)
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))

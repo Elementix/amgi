@@ -153,7 +153,7 @@ struct ReaderSettingsView: View {
                     selection: Binding($selectedFontRaw)
                 ) {
                     ForEach(ReaderFontOption.allCases) { option in
-                        Text(option.title).tag(option.rawValue)
+                        Text(option.title).amgiTag(option.rawValue)
                     }
                 }
                 SettingsSeparator()
@@ -246,7 +246,7 @@ struct ReaderSettingsView: View {
                     selection: Binding($themeModeRaw)
                 ) {
                     ForEach(ReaderThemeMode.allCases) { mode in
-                        Text(mode.label).tag(mode.rawValue)
+                        Text(mode.label).amgiTag(mode.rawValue)
                     }
                 }
 

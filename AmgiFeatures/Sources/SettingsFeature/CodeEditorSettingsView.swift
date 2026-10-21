@@ -44,7 +44,7 @@ struct CodeEditorSettingsView: View {
                     selection: Binding($fontFamilyRaw)
                 ) {
                     ForEach(CodeFontFamily.allCases) { family in
-                        Text(family.displayName).tag(family.rawValue)
+                        Text(family.displayName).amgiTag(family.rawValue)
                     }
                 }
             }

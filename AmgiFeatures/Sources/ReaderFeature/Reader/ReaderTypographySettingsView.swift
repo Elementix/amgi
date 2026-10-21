@@ -99,7 +99,7 @@ struct ReaderTypographySettingsView: View {
         Section {
             Picker("Font", selection: fontFamilyBinding) {
                 ForEach(ReaderTypographyPreferences.FontFamily.allCases) { option in
-                    Text(option.label).tag(option)
+                    Text(option.label).amgiTag(option)
                 }
             }
             .pickerStyle(.segmented)
@@ -128,7 +128,7 @@ struct ReaderTypographySettingsView: View {
         Section {
             Picker("Margins", selection: pageMarginBinding) {
                 ForEach(ReaderTypographyPreferences.PageMargin.allCases) { option in
-                    Text(option.label).tag(option)
+                    Text(option.label).amgiTag(option)
                 }
             }
             .pickerStyle(.segmented)

@@ -359,7 +359,7 @@ struct TemplateEditorHeaderCard: View {
 
             Picker("Template Editor", selection: $editorTab) {
                 ForEach(TemplateEditorTab.allCases, id: \.self) { tab in
-                    Text(tab.label).tag(tab)
+                    Text(tab.label).amgiTag(tab)
                 }
             }
             .pickerStyle(.segmented)

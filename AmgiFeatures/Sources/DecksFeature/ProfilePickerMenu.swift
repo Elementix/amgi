@@ -19,7 +19,7 @@ struct ProfilePickerMenu: View {
         Menu {
             Picker("Switch Profile", selection: selection) {
                 ForEach(store.accounts) { account in
-                    Text(account.displayName).tag(account.id)
+                    Text(account.displayName).amgiTag(account.id)
                 }
             }
         } label: {

@@ -145,7 +145,7 @@ public struct LibraryListContent: View {
             Spacer()
             Picker("Deck view", selection: $layout) {
                 ForEach(DeckLayout.allCases) { option in
-                    Label(option.label, systemImage: option.symbol).tag(option)
+                    Label(option.label, systemImage: option.symbol).amgiTag(option)
                 }
             }
             .pickerStyle(.segmented)

@@ -92,8 +92,8 @@ struct FsrsSimulatorModeSection: View {
     var body: some View {
         Section {
             Picker("Mode", selection: $mode) {
-                Text("Review").tag(FsrsSimulatorMode.review)
-                Text("Workload").tag(FsrsSimulatorMode.workload)
+                Text("Review").amgiTag(FsrsSimulatorMode.review)
+                Text("Workload").amgiTag(FsrsSimulatorMode.workload)
             }
             .pickerStyle(.segmented)
         }
