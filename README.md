@@ -51,7 +51,7 @@ upstream there.
 
 | | |
 |---|---|
-| Compiles for iOS 17 | ⏳ First CI build in progress. This line gets updated with the result. |
+| Compiles for iOS 17 | ✅ [CI run 39648940425](https://github.com/Elementix/amgi/actions/runs/39648940425) (2026-10-21, commit `0166091`) built and packaged the unsigned IPA |
 | Tested on a real iOS 17 device | ❌ Not yet |
 | Apple Watch app | ❌ Not included (see [What's not included](#whats-not-included)) |
 
