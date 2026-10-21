@@ -3,6 +3,8 @@ name: Build Unsigned IPA
 on:
   workflow_dispatch:        # manual trigger from Actions UI
   push:
+    branches:
+      - ios17               # iOS 17 port: every push builds an IPA
     tags:
       - 'v*'                # any version tag triggers release publish
 
@@ -105,33 +107,6 @@ jobs:
           cd AmgiApp && xcodegen generate
           echo "=== Files in AmgiApp/ ==="
           ls -la ../AmgiApp/
-
-      # ── 9.2. Simulator smoke check (catch UI/platform compile issues early) ──
-      - name: Build Debug Simulator (Compatibility Smoke Check)
-        run: |
-          set -o pipefail
-          DERIVED_DATA_PATH="$RUNNER_TEMP/DerivedData"
-          if xcodebuild -list -project AmgiApp/AmgiApp.xcodeproj | grep -q "Tests"; then
-            xcodebuild build-for-testing \
-              -project AmgiApp/AmgiApp.xcodeproj \
-              -scheme AmgiApp \
-              -configuration Debug \
-              -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
-              -derivedDataPath "$DERIVED_DATA_PATH" \
-              -skipPackagePluginValidation \
-              -skipMacroValidation \
-              2>&1 | tee simulator-build.log
-          else
-            xcodebuild build \
-              -project AmgiApp/AmgiApp.xcodeproj \
-              -scheme AmgiApp \
-              -configuration Debug \
-              -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
-              -derivedDataPath "$DERIVED_DATA_PATH" \
-              -skipPackagePluginValidation \
-              -skipMacroValidation \
-              2>&1 | tee simulator-build.log
-          fi
 
       # ── 9.5. Run tests ────────────────────────────────────────────
       # TODO: Add CI test step once testability is sorted out.

@@ -7,7 +7,6 @@
 
 import AnkiRustLib
 import AnkiProto
-import Synchronization
 public import Foundation
 private import SwiftProtobuf
 private import os
@@ -20,18 +19,18 @@ public final class AnkiBackend: Sendable {
 
     /// Written during `openCollection` and read from arbitrary threads —
     /// the card asset scheme handler and the watch's review screen among
-    /// them. A `Mutex` rather than `nonisolated(unsafe)` storage: the
+    /// them. A lock rather than `nonisolated(unsafe)` storage: the
     /// previous unsynchronized `var` was a genuine data race on a `String?`
     /// across a profile switch, and the annotation was suppressing the check
     /// that would have said so.
-    private let mediaFolderStorage = Mutex<String?>(nil)
+    private let mediaFolderStorage = OSAllocatedUnfairLock<String?>(initialState: nil)
 
     private struct OpenPaths: Sendable {
         let collection: String
         let mediaFolder: String
         let mediaDb: String
     }
-    private let openPathsStorage = Mutex<OpenPaths?>(nil)
+    private let openPathsStorage = OSAllocatedUnfairLock<OpenPaths?>(initialState: nil)
 
     /// Absolute path of the open collection's media folder, or nil if no
     /// collection is currently open. Safe to read from any thread; callers

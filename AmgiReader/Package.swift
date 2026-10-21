@@ -65,7 +65,7 @@ let package = Package(
     // which itself requires macOS 15. The base AmgiReader target is
     // pure-Swift and would happily run on lower minimums, but SPM
     // platform requirements are per-package, not per-target.
-    platforms: [.iOS(.v18), .macOS(.v15)],
+    platforms: [.iOS(.v17), .macOS(.v15)],
     products: [
         .library(name: "Reader", targets: ["Reader"]),
         .library(name: "ReaderDictionary", targets: ["ReaderDictionary"]),

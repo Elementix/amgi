@@ -36,7 +36,7 @@ let package = Package(
     name: "AmgiUI",
     // watchOS 11 added for the AmgiWatchApp target (PR #14); matches the
     // root package's watchOS floor.
-    platforms: [.iOS(.v18), .macOS(.v15), .watchOS(.v11)],
+    platforms: [.iOS(.v17), .macOS(.v15), .watchOS(.v11)],
     products: [
         .library(name: "Theme", targets: ["Theme"]),
         .library(name: "UI", targets: ["UI"]),

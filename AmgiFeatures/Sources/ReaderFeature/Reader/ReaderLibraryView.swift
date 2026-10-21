@@ -93,7 +93,7 @@ package struct ReaderLibraryView: View {
             placement: .navigationBarDrawer(displayMode: .automatic),
             prompt: "Search books"
         )
-        .searchFocused($searchFocused)
+        .searchFocusedIfAvailable($searchFocused)
         .onChange(of: searchText) { _, _ in model.rebuildViewData(searchText: searchText, sortMode: sortMode) }
         .onChange(of: sortModeRaw) { _, _ in model.rebuildViewData(searchText: searchText, sortMode: sortMode) }
         .onChange(of: deckName) { _, _ in model.startReload(searchText: searchText, sortMode: sortMode) }
@@ -160,6 +160,19 @@ package struct ReaderLibraryView: View {
             Task { await model.importEPUBs(urls, searchText: searchText, sortMode: sortMode) }
         case .failure(let error):
             model.importError = error.localizedDescription
+        }
+    }
+}
+
+/// `searchFocused` is iOS 18+. On iOS 17 the Find shortcut simply doesn't
+/// move focus into the search field.
+private extension View {
+    @ViewBuilder
+    func searchFocusedIfAvailable(_ binding: FocusState<Bool>.Binding) -> some View {
+        if #available(iOS 18, macOS 15, *) {
+            searchFocused(binding)
+        } else {
+            self
         }
     }
 }

@@ -41,43 +41,7 @@ struct MainTabView: View {
     @State private var selection: MainTab = .library
 
     var body: some View {
-        TabView(selection: $selection) {
-            // 1. Library
-            Tab("Library", systemImage: "rectangle.stack", value: MainTab.library) {
-                NavigationStack {
-                    DeckListView(
-                        onSwitchProfile: { await switchProfile(to: $0) },
-                        onSync: { startSync() },
-                        onImport: onImport
-                    )
-                }
-            }
-            // 2. Reader and 3. Study both live in ReaderFeature.
-            if showReaderTab {
-                Tab("Read", systemImage: "book", value: MainTab.read) {
-                    NavigationStack {
-                        ReaderLibraryView(refreshID: refreshID)
-                    }
-                }
-            }
-            Tab("Study", systemImage: "graduationcap", value: MainTab.study) {
-                NavigationStack {
-                    StudyLandingView(onSelectDeck: onSelectStudyDeck)
-                }
-            }
-            // 4. Stats
-            Tab("Stats", systemImage: "chart.bar", value: MainTab.stats) {
-                NavigationStack {
-                    StatsDashboardView(refreshID: refreshID)
-                }
-            }
-            // 5. Settings
-            Tab("Settings", systemImage: "gearshape", value: MainTab.settings) {
-                NavigationStack {
-                    SettingsView(onSwitchProfile: { await switchProfile(to: $0) })
-                }
-            }
-        }
+        tabs
         .background {
             Button("Settings") { selection = .settings }
                 .keyboardShortcut(",", modifiers: .command)
@@ -86,4 +50,88 @@ struct MainTabView: View {
         }
     }
 
+    /// The `Tab` builder is iOS 18+; iOS 17 gets the same tabs through
+    /// `.tabItem` + `.tag`.
+    @ViewBuilder
+    private var tabs: some View {
+        if #available(iOS 18, macOS 15, *) {
+            TabView(selection: $selection) {
+                // 1. Library
+                Tab("Library", systemImage: "rectangle.stack", value: MainTab.library) {
+                    libraryTab
+                }
+                // 2. Reader and 3. Study both live in ReaderFeature.
+                if showReaderTab {
+                    Tab("Read", systemImage: "book", value: MainTab.read) {
+                        readTab
+                    }
+                }
+                Tab("Study", systemImage: "graduationcap", value: MainTab.study) {
+                    studyTab
+                }
+                // 4. Stats
+                Tab("Stats", systemImage: "chart.bar", value: MainTab.stats) {
+                    statsTab
+                }
+                // 5. Settings
+                Tab("Settings", systemImage: "gearshape", value: MainTab.settings) {
+                    settingsTab
+                }
+            }
+        } else {
+            TabView(selection: $selection) {
+                libraryTab
+                    .tabItem { Label("Library", systemImage: "rectangle.stack") }
+                    .tag(MainTab.library)
+                if showReaderTab {
+                    readTab
+                        .tabItem { Label("Read", systemImage: "book") }
+                        .tag(MainTab.read)
+                }
+                studyTab
+                    .tabItem { Label("Study", systemImage: "graduationcap") }
+                    .tag(MainTab.study)
+                statsTab
+                    .tabItem { Label("Stats", systemImage: "chart.bar") }
+                    .tag(MainTab.stats)
+                settingsTab
+                    .tabItem { Label("Settings", systemImage: "gearshape") }
+                    .tag(MainTab.settings)
+            }
+        }
+    }
+
+    private var libraryTab: some View {
+        NavigationStack {
+            DeckListView(
+                onSwitchProfile: { await switchProfile(to: $0) },
+                onSync: { startSync() },
+                onImport: onImport
+            )
+        }
+    }
+
+    private var readTab: some View {
+        NavigationStack {
+            ReaderLibraryView(refreshID: refreshID)
+        }
+    }
+
+    private var studyTab: some View {
+        NavigationStack {
+            StudyLandingView(onSelectDeck: onSelectStudyDeck)
+        }
+    }
+
+    private var statsTab: some View {
+        NavigationStack {
+            StatsDashboardView(refreshID: refreshID)
+        }
+    }
+
+    private var settingsTab: some View {
+        NavigationStack {
+            SettingsView(onSwitchProfile: { await switchProfile(to: $0) })
+        }
+    }
 }

@@ -45,7 +45,7 @@ package struct BrowseView: View {
         @Bindable var model = model
         decoratedContent
             .searchable(text: $model.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search notes...")
-            .searchFocused($searchFocused)
+            .searchFocusedIfAvailable($searchFocused)
             .task { await model.loadInitial() }
             // Keyed on the assembled query so text, deck, and tag changes all
             // restart one search — SwiftUI cancels the previous run, which is
@@ -596,3 +596,16 @@ struct NoteRowView: View {
     }
 }
 #endif
+
+/// `searchFocused` is iOS 18+. On iOS 17 the Find shortcut simply doesn't
+/// move focus into the search field.
+private extension View {
+    @ViewBuilder
+    func searchFocusedIfAvailable(_ binding: FocusState<Bool>.Binding) -> some View {
+        if #available(iOS 18, macOS 15, *) {
+            searchFocused(binding)
+        } else {
+            self
+        }
+    }
+}

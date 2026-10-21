@@ -37,12 +37,12 @@ struct AllBooksSection: View {
                     if let book = bookForId(item.id) {
                         NavigationLink {
                             ReaderBookDetailView(book: book, progress: progress)
-                                .navigationTransition(.zoom(sourceID: item.id, in: coverTransition))
+                                .coverZoomDestination(sourceID: item.id, in: coverTransition)
                         } label: {
                             AllBooksCell(item: item)
                         }
                         .buttonStyle(.pressScale)
-                        .matchedTransitionSource(id: item.id, in: coverTransition)
+                        .coverZoomSource(id: item.id, in: coverTransition)
                     } else {
                         AllBooksCell(item: item)
                     }

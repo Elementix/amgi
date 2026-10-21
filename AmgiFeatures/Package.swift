@@ -34,7 +34,7 @@ let sharedSwiftSettings: [SwiftSetting] = [
 
 let package = Package(
     name: "AmgiFeatures",
-    platforms: [.iOS(.v18), .macOS(.v15), .watchOS(.v11)],
+    platforms: [.iOS(.v17), .macOS(.v15), .watchOS(.v11)],
     products: [
         .library(name: "AppCore", targets: ["AppCore"]),
         .library(name: "AppShared", targets: ["AppShared"]),

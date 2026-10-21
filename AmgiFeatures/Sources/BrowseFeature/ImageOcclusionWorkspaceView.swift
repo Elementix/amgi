@@ -77,7 +77,7 @@ struct ImageOcclusionWorkspaceView: View {
 
             canvas
         }
-        .toolbarVisibility(.hidden, for: .tabBar)
+        .toolbar(.hidden, for: .tabBar)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { workspaceToolbar }

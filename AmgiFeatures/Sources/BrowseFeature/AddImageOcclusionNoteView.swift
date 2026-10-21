@@ -39,7 +39,7 @@ struct AddImageOcclusionNoteView: View {
                 selectedItem: $selectedItem,
                 onEditMasks: { showOcclusionEditor = true }
             )
-            .toolbarVisibility(.hidden, for: .tabBar)
+            .toolbar(.hidden, for: .tabBar)
             .navigationTitle("Image Occlusion")
             .navigationBarTitleDisplayMode(.inline)
             .task { await model.loadDecks() }

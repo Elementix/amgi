@@ -2,7 +2,7 @@ name: AmgiApp
 options:
   bundleIdPrefix: com.amgiapp
   deploymentTarget:
-    iOS: "18.0"
+    iOS: "17.0"
     watchOS: "11.0"
   defaultSourceDirectoryType: syncedFolder
   # Nest the Resources/* folder references under a single "Resources" group in

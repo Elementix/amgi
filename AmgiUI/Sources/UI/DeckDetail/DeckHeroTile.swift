@@ -97,7 +97,21 @@ public struct DeckHeroTile: View {
     }
 
     private func mixed(_ lhs: Color, with rhs: Color, by fraction: Double) -> Color {
-        lhs.mix(with: rhs, by: fraction, in: .perceptual)
+        if #available(iOS 18, macOS 15, watchOS 11, *) {
+            return lhs.mix(with: rhs, by: fraction, in: .perceptual)
+        }
+        // iOS 17: `mix` doesn't exist yet — interpolate linearly in sRGB.
+        let environment = EnvironmentValues()
+        let a = lhs.resolve(in: environment)
+        let b = rhs.resolve(in: environment)
+        let t = Float(fraction)
+        return Color(
+            .sRGB,
+            red: Double(a.red + (b.red - a.red) * t),
+            green: Double(a.green + (b.green - a.green) * t),
+            blue: Double(a.blue + (b.blue - a.blue) * t),
+            opacity: Double(a.opacity + (b.opacity - a.opacity) * t)
+        )
     }
 }
 

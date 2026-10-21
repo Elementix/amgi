@@ -7,6 +7,9 @@
 
 public import AppIntents
 import Foundation
+#if canImport(UIKit) && !os(watchOS)
+import UIKit
+#endif
 
 /// "Study Korean in Amgi" — opens the app straight into the reviewer.
 public struct StudyDeckIntent: AppIntent {
@@ -26,10 +29,20 @@ public struct StudyDeckIntent: AppIntent {
         Summary("Study \(\.$deck)")
     }
 
-    public func perform() async throws -> some IntentResult & OpensIntent {
+    public func perform() async throws -> some IntentResult {
         guard let deckId = deck.deckId,
               let url = URL(string: "amgi://review?deckId=\(deckId)")
         else { throw AmgiIntentError.badDeckId }
-        return .result(opensIntent: OpenURLIntent(url))
+        // `OpenURLIntent` is iOS 18+. `openAppWhenRun` has already brought
+        // the app forward, so it can route its own deep link on iOS 17 too.
+        await Self.openInApp(url)
+        return .result()
+    }
+
+    @MainActor
+    private static func openInApp(_ url: URL) async {
+        #if canImport(UIKit) && !os(watchOS)
+        await UIApplication.shared.open(url)
+        #endif
     }
 }

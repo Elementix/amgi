@@ -157,15 +157,10 @@ private extension HeatmapChartOptimized {
                             gridView()
                         }
                         .id("heatmapContent")
+                        .reportsLegacyScrollOffset()
                     }
                     .defaultScrollAnchor(.trailing)
-                    .onScrollGeometryChange(
-                        for: CGFloat.self,
-                        of: { geometry in geometry.contentOffset.x },
-                        action: { _, newValue in
-                            handleScroll(offset: newValue)
-                        }
-                    )
+                    .onHorizontalScrollOffsetChange { handleScroll(offset: $0) }
                 }
 
                 legendView()
@@ -342,6 +337,51 @@ private extension HeatmapChartOptimized {
         }
     }
 }
+
+/// `onScrollGeometryChange` is iOS 18+. On iOS 17 the offset comes from the
+/// content's frame in the scroll view's coordinate space instead.
+private struct HeatmapScrollOffsetKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+private extension View {
+    /// Content side of the iOS 17 fallback: publishes the content's offset
+    /// within the scroll view. No-op where `onScrollGeometryChange` exists.
+    @ViewBuilder
+    func reportsLegacyScrollOffset() -> some View {
+        if #available(iOS 18, macOS 15, watchOS 11, *) {
+            self
+        } else {
+            background(GeometryReader { proxy in
+                Color.clear.preference(
+                    key: HeatmapScrollOffsetKey.self,
+                    value: -proxy.frame(in: .named(heatmapScrollSpace)).minX
+                )
+            })
+        }
+    }
+
+    @ViewBuilder
+    func onHorizontalScrollOffsetChange(
+        _ action: @escaping @MainActor @Sendable (CGFloat) -> Void
+    ) -> some View {
+        if #available(iOS 18, macOS 15, watchOS 11, *) {
+            onScrollGeometryChange(
+                for: CGFloat.self,
+                of: { geometry in geometry.contentOffset.x },
+                action: { _, newValue in action(newValue) }
+            )
+        } else {
+            coordinateSpace(name: heatmapScrollSpace)
+                .onPreferenceChange(HeatmapScrollOffsetKey.self) { offset in
+                    MainActor.assumeIsolated { action(offset) }
+                }
+        }
+    }
+}
+
+private let heatmapScrollSpace = "heatmapScroll"
 
 // MARK: - Preview
 
