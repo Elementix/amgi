@@ -156,6 +156,26 @@ APIs that are back-deployed and needed no change: `@Entry`,
 (Liquid Glass materials and similar) needed no change either. On iOS 17 it
 takes its existing pre-iOS-26 fallback.
 
+### Community fixes merged from open upstream PRs
+
+On 2026-10-21 all open upstream issues and PRs were reviewed for anything
+that affects studying shared decks on iOS 17. These three open PRs by
+[zom-2018](https://github.com/zom-2018) were cherry-picked with `-x`, so each
+commit keeps its author and records its original commit. Upstream hasn't
+merged them yet. Their own testing was in Apple's simulator, not on a device.
+
+| PR | Fixes | Change |
+|---|---|---|
+| [#50](https://github.com/antigluten/amgi/pull/50) | [#49](https://github.com/antigluten/amgi/issues/49): swiping to delete a deck could crash the app before you confirmed | The swipe button no longer uses the `.destructive` role, which removed the row early. It keeps its red tint. |
+| [#41](https://github.com/antigluten/amgi/pull/41) | [#25](https://github.com/antigluten/amgi/issues/25): learning steps under 1 minute (e.g. 30s) were saved as 0m | Fractional minutes are kept, and `30s` is accepted as input. |
+| [#42](https://github.com/antigluten/amgi/pull/42) | [#3](https://github.com/antigluten/amgi/issues/3): card audio and TTS didn't play reliably | `[sound:]` markers are matched case-insensitively. TTS speaks plain text, not HTML. Speech and sound replay in order. Audio stops when the card view closes. |
+
+These use no iOS 18 APIs. Known upstream issues **not** addressed here:
+long MathJax cards being cut off ([#52](https://github.com/antigluten/amgi/issues/52),
+no fix exists yet), the post-review popup ([#24](https://github.com/antigluten/amgi/issues/24)),
+and media *sync* ([#19](https://github.com/antigluten/amgi/issues/19)). Media
+inside an imported `.apkg` is unaffected by #19.
+
 ### CI (`.github/workflows/build-ipa.yml`)
 
 - Added a `push` trigger for the `ios17` branch, so every push builds an IPA.
@@ -298,6 +318,7 @@ From upstream, kept as-is:
 - **[DreamAfar](https://github.com/DreamAfar)**, for the v0.0.3 fork that contributed Image Occlusion, the multi-theme system, the Settings tab, the card template editor, retrievability stats, tag management, the rich note editor, and the GitHub Actions IPA workflow
 - **[AnkiDroid](https://github.com/ankidroid/Anki-Android)**, for pioneering the Rust backend bridge pattern on mobile
 - **[Point-Free](https://www.pointfree.co/)**, for [swift-dependencies](https://github.com/pointfreeco/swift-dependencies)
+- **[zom-2018](https://github.com/zom-2018)**, for the deck-delete, learning-step and audio fixes (upstream PRs #50, #41, #42)
 - **[Manhhao](https://github.com/Manhhao)**, for [hoshidicts](https://github.com/Manhhao/hoshidicts), the Reader's dictionary engine
 
 iOS 17 port: **Claude** (Anthropic), via Claude Code, for Elementix.
