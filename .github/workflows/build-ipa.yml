@@ -27,8 +27,12 @@ defaults:
 
 jobs:
   build:
-    runs-on: macos-26
-    timeout-minutes: 60
+    # iOS 17 port: Intel macOS 26 (x64) instead of `macos-26` (arm64). The
+    # arm64 pool repeatedly failed to acquire a runner ("capacity
+    # constraints"); this image also ships Xcode 26.3. Cargo cross-compiles
+    # to the aarch64 iOS targets either way. Intel is slower, hence 120 min.
+    runs-on: macos-26-intel
+    timeout-minutes: 120
 
     # GITHUB_TOKEN scopes — minimal set required for tag-triggered release publish.
     permissions:
@@ -79,10 +83,10 @@ jobs:
             anki-upstream/out
           # Toolchain version is part of the key so a Rust upgrade (1.95 → ...)
           # forces a clean rebuild rather than reusing artifacts from the prior compiler.
-          key: ${{ runner.os }}-rust-1.95-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-rust-1.95-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-rust-1.95-
-            ${{ runner.os }}-rust-
+            ${{ runner.os }}-${{ runner.arch }}-rust-1.95-
+            ${{ runner.os }}-${{ runner.arch }}-rust-
 
       # ── 6. Install Homebrew dependencies ──────────────────────────
       - name: Install Homebrew dependencies

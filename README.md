@@ -139,8 +139,14 @@ takes its existing pre-iOS-26 fallback.
   and copies each `error:` line from the build log into an annotation. Job
   logs are visible only to signed-in users, but annotations show on the public
   run page.
-- Everything else matches upstream: Xcode 26.3 on `macos-26`, Rust 1.95,
-  unsigned archive, and an IPA uploaded as a 7-day artifact.
+- Switched the runner from `macos-26` (Apple Silicon) to `macos-26-intel`
+  (Intel, same macOS 26 and Xcode 26.3). The Apple Silicon pool failed to
+  assign a machine three times in a row ("capacity constraints"). The Rust
+  engine is cross-compiled for the iPhone's ARM chip either way. The time
+  limit went from 60 to 120 minutes because Intel runners are slower, and the
+  Rust cache key now includes the CPU architecture.
+- Everything else matches upstream: Xcode 26.3, Rust 1.95, unsigned archive,
+  and an IPA uploaded as a 7-day artifact.
 
 ## Known differences on iOS 17
 
