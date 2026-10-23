@@ -52,7 +52,7 @@ upstream there.
 | | |
 |---|---|
 | Compiles for iOS 17 | ✅ [CI run 39648940425](https://github.com/Elementix/amgi/actions/runs/39648940425) (2026-10-21, commit `0166091`) built and packaged the unsigned IPA |
-| Tested on a real iOS 17 device | ⚠️ Builds `0166091` and `72ffd70` launched and ran onboarding on an iPhone 14 Pro (iOS 17.0), then crashed entering the main screen. Both crashes are fixed (see [the `.tag()` crash](#the-tag-crash-found-on-device) and [the async-closure crash](#the-async-closure-crash-found-on-device)); waiting on a retest. |
+| Tested on a real iOS 17 device | ✅ Build `0af7a29` launches, finishes onboarding and runs on an iPhone 14 Pro (iOS 17.0). The two earlier builds crashed entering the main screen (see [the `.tag()` crash](#the-tag-crash-found-on-device) and [the async-closure crash](#the-async-closure-crash-found-on-device)). Deck import was then fixed for iOS 17 (see [Deck import](#deck-import)); waiting on a retest. |
 | Apple Watch app | ❌ Not included (see [What's not included](#whats-not-included)) |
 
 ## Installing (TrollStore / sideloading)
@@ -77,9 +77,13 @@ collections).
 
 1. On the iPhone, open the shared deck's page on
    [ankiweb.net](https://ankiweb.net/shared/decks) in Safari and tap
-   **Download**. Save the `.apkg` to the Files app.
-2. In Amgi, go to **Library** and choose **Import**, then pick the `.apkg`.
-3. Repeat for each deck.
+   **Download**.
+2. Then either:
+   - tap the download (or the file in the Files app), tap **Share**, and pick
+     **Amgi**; or
+   - in Amgi, go to **Library**, tap **⋯** (top right), choose
+     **Import Deck…**, and pick the `.apkg`.
+3. A banner shows the import progress and how many notes were added.
 
 You can also skip files and sync: sign in to AnkiWeb (or a self-hosted sync
 server) in the app and sync a collection you already have.
@@ -183,6 +187,18 @@ mangling across the package ↔ app link boundary. With it off, a plain
 `nonisolated async` function runs on the global concurrent executor instead
 of the caller's actor, which was the standard Swift 6.0/6.1 behavior. The two
 functions upstream already marks `@concurrent` behave the same either way.
+
+### Deck import
+
+On iOS 17, the **Import Deck…** picker showed downloaded `.apkg` files greyed
+out or did nothing when one was tapped. Four changes:
+
+| Where | Change |
+|---|---|
+| `AmgiApp/Info.plist` | Declares `net.ankiweb.apkg` / `net.ankiweb.colpkg` (`UTImportedTypeDeclarations`) and registers Amgi as an alternate viewer for them (`CFBundleDocumentTypes`), so iOS recognizes the files and offers **Amgi** in Share / "Open in…" from Safari and Files. Upstream had no document types. |
+| `RootFeature/RootView.swift`, `AppShared/DeckImportModifier.swift` | `onOpenURL` now passes file URLs to the deck importer, so "Open in Amgi" imports directly. The copy iOS places in `Documents/Inbox` is deleted afterwards. |
+| `AppShared/DeckImportModifier.swift` | The picker allows any file (`.item` instead of `.data`), so nothing is greyed out. The extension check was removed and the Anki engine now rejects files that aren't packages. Error alerts wait for the picker to finish dismissing, because iOS 17 drops an alert presented during that animation. |
+| `AppShared/ImportHelper.swift` | No longer fails with "Cannot access the selected file" when `startAccessingSecurityScopedResource()` returns `false`. That's normal for non-scoped files and for an unsandboxed TrollStore install. Only a successful call is balanced with `stop…`. |
 
 ### Community fixes merged from open upstream PRs
 

@@ -25,10 +25,12 @@ enum ImportError: Error, LocalizedError {
 
 public enum ImportHelper {
     public static func importPackage(from url: URL) async throws -> String {
-        guard url.startAccessingSecurityScopedResource() else {
-            throw ImportError.accessDenied
-        }
-        defer { url.stopAccessingSecurityScopedResource() }
+        // `false` is normal for files that aren't security-scoped (an "Open
+        // in…" copy in our own Inbox, or any file when the app runs
+        // unsandboxed under TrollStore), so only balance a successful call
+        // and let the copy below surface real permission errors.
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
 
         let tempDir = FileManager.default.temporaryDirectory
         let tempFile = tempDir.appendingPathComponent(url.lastPathComponent)

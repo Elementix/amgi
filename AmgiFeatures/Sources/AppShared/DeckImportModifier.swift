@@ -6,11 +6,14 @@
 //
 
 public import SwiftUI
+import Foundation
 import Theme
 import UniformTypeIdentifiers
 
 private struct DeckImportModifier: ViewModifier {
     @Binding var isPresented: Bool
+    /// A package handed to the app from outside (Files / Safari "Open in…").
+    @Binding var openedFile: URL?
     let onRefresh: () -> Void
 
     @State private var status: ImportStatusBanner.Status?
@@ -18,8 +21,16 @@ private struct DeckImportModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .fileImporter(isPresented: $isPresented, allowedContentTypes: [.data]) { result in
+            // `.item`, not `.data`: on iOS 17 a downloaded `.apkg` can be
+            // typed so that it doesn't conform to `public.data` and shows up
+            // greyed out. The backend rejects anything that isn't a package.
+            .fileImporter(isPresented: $isPresented, allowedContentTypes: [.item]) { result in
                 handleImport(result)
+            }
+            .onChange(of: openedFile) { _, url in
+                guard let url else { return }
+                openedFile = nil
+                handleImport(.success(url), removeAfterwards: true)
             }
             .overlay(alignment: .top) { ImportStatusBanner(status: status) }
             .animation(AmgiMotion.momentum, value: status)
@@ -37,15 +48,13 @@ private struct DeckImportModifier: ViewModifier {
 }
 
 private extension DeckImportModifier {
-    func handleImport(_ result: Result<URL, any Error>) {
+    /// `removeAfterwards` deletes the source once read: "Open in…" hands the
+    /// app its own copy in `Documents/Inbox`, which would otherwise pile up.
+    func handleImport(_ result: Result<URL, any Error>, removeAfterwards: Bool = false) {
         switch result {
         case .success(let url):
-            let ext = url.pathExtension.lowercased()
-            guard ext == "apkg" || ext == "colpkg" else {
-                failure = "Unsupported file type. Please select an .apkg or .colpkg file."
-                return
-            }
             Task {
+                defer { if removeAfterwards { try? FileManager.default.removeItem(at: url) } }
                 status = .importing(fileName: url.lastPathComponent)
                 do {
                     let summary = try await ImportHelper.importPackage(from: url)
@@ -55,17 +64,28 @@ private extension DeckImportModifier {
                     status = nil
                 } catch {
                     status = nil
-                    failure = error.localizedDescription
+                    await showFailure(error.localizedDescription)
                 }
             }
         case .failure(let error):
-            failure = "Could not select file: \(error.localizedDescription)"
+            Task { await showFailure("Could not select file: \(error.localizedDescription)") }
         }
+    }
+
+    /// Waits out the document picker's dismissal first: on iOS 17 an alert
+    /// presented while the picker is still animating away is dropped.
+    func showFailure(_ message: String) async {
+        try? await Task.sleep(for: .milliseconds(600))
+        failure = message
     }
 }
 
 extension View {
-    public func deckImport(isPresented: Binding<Bool>, onRefresh: @escaping () -> Void) -> some View {
-        modifier(DeckImportModifier(isPresented: isPresented, onRefresh: onRefresh))
+    public func deckImport(
+        isPresented: Binding<Bool>,
+        openedFile: Binding<URL?> = .constant(nil),
+        onRefresh: @escaping () -> Void
+    ) -> some View {
+        modifier(DeckImportModifier(isPresented: isPresented, openedFile: openedFile, onRefresh: onRefresh))
     }
 }

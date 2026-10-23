@@ -36,6 +36,7 @@ public struct RootView: View {
 
     @State private var pendingReviewDeckId: DeckID?
     @State private var showImport = false
+    @State private var openedPackage: URL?
     @State private var refreshID = UUID()
 
     @Shared(.appStorage(ReaderPreferences.Keys.showTab))
@@ -57,6 +58,11 @@ public struct RootView: View {
                 }
             }
             .onOpenURL { url in
+                // An .apkg/.colpkg opened from Files, Safari or the share sheet.
+                if url.isFileURL {
+                    openedPackage = url
+                    return
+                }
                 guard url.scheme == "amgi",
                       url.host == "review",
                       let deckIdStr = URLComponents(url: url, resolvingAgainstBaseURL: false)?
@@ -97,7 +103,7 @@ public struct RootView: View {
         }
         // still drives the tabs not yet on CollectionStore
         .syncFlow { refreshID = UUID() }
-        .deckImport(isPresented: $showImport) {
+        .deckImport(isPresented: $showImport, openedFile: $openedPackage) {
             store.invalidateAll()
             refreshID = UUID()
         }
