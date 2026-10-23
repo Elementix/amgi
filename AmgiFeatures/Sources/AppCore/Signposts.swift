@@ -45,8 +45,13 @@ public enum AppSignpost {
     /// cancellation, so a cancelled `.task(id:)` does not leave an interval
     /// open forever (an unterminated interval is reported as such and skews
     /// nothing else).
+    ///
+    /// `isolation` keeps `body` on the caller's actor (what
+    /// NonisolatedNonsendingByDefault did implicitly; that feature is off in
+    /// the iOS 17 port because its function types need the iOS 18 runtime).
     public static func measure<T>(
         _ name: StaticString,
+        isolation: isolated (any Actor)? = #isolation,
         _ body: () async throws -> T
     ) async rethrows -> T {
         let id = signposter.makeSignpostID()
