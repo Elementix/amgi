@@ -26,7 +26,6 @@ let sharedSwiftSettings: [SwiftSetting] = [
     .enableUpcomingFeature("MemberImportVisibility"),
     .enableUpcomingFeature("FullTypedThrows"),
     .enableUpcomingFeature("InferIsolatedConformances"),
-    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
     .enableExperimentalFeature("AccessLevelOnImport"),
     .enableExperimentalFeature("StrictMemorySafety"),
     .enableExperimentalFeature("StrictSendableMetatypes"),

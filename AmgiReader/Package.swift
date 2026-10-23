@@ -37,16 +37,17 @@ let sharedSwiftSettings: [SwiftSetting] = [
     .enableUpcomingFeature("MemberImportVisibility"),
     .enableUpcomingFeature("FullTypedThrows"),
     .enableUpcomingFeature("InferIsolatedConformances"),
-    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
     .enableExperimentalFeature("AccessLevelOnImport"),
     .enableExperimentalFeature("StrictMemorySafety"),
     .enableExperimentalFeature("StrictSendableMetatypes"),
 ] + fullDiagnosticFlags
 
 // Lean tier for the C-/Cxx-interop target. Drops StrictMemorySafety (the
-// interop boundary is unsafe by nature and would flood warnings). Keeps
-// NonisolatedNonsendingByDefault so async function-type mangling stays
-// consistent across the package ↔ app link boundary.
+// interop boundary is unsafe by nature and would flood warnings).
+// NonisolatedNonsendingByDefault is deliberately OFF in every manifest and
+// the app target (iOS 17 port): its function types need
+// swift_getExtendedFunctionTypeMetadata, which only exists in the iOS 18+
+// Swift runtime, so the app segfaults on iOS 17. Keep all of them in lockstep.
 let interopSwiftSettings: [SwiftSetting] = [
     .enableExperimentalFeature("IsolatedAny"),
     .enableUpcomingFeature("ExistentialAny"),
@@ -54,7 +55,6 @@ let interopSwiftSettings: [SwiftSetting] = [
     .enableUpcomingFeature("MemberImportVisibility"),
     .enableUpcomingFeature("FullTypedThrows"),
     .enableUpcomingFeature("InferIsolatedConformances"),
-    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
     .enableExperimentalFeature("AccessLevelOnImport"),
     .enableExperimentalFeature("StrictSendableMetatypes"),
 ] + leanDiagnosticFlags

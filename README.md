@@ -52,7 +52,7 @@ upstream there.
 | | |
 |---|---|
 | Compiles for iOS 17 | ✅ [CI run 39648940425](https://github.com/Elementix/amgi/actions/runs/39648940425) (2026-10-21, commit `0166091`) built and packaged the unsigned IPA |
-| Tested on a real iOS 17 device | ⚠️ First build (`0166091`) launched and ran onboarding on an iPhone 14 Pro (iOS 17.0), then crashed entering the main screen. Fixed in the next build (see [the `.tag()` crash](#the-tag-crash-found-on-device)); waiting on a retest. |
+| Tested on a real iOS 17 device | ⚠️ Builds `0166091` and `72ffd70` launched and ran onboarding on an iPhone 14 Pro (iOS 17.0), then crashed entering the main screen. Both crashes are fixed (see [the `.tag()` crash](#the-tag-crash-found-on-device) and [the async-closure crash](#the-async-closure-crash-found-on-device)); waiting on a retest. |
 | Apple Watch app | ❌ Not included (see [What's not included](#whats-not-included)) |
 
 ## Installing (TrollStore / sideloading)
@@ -155,6 +155,34 @@ APIs that are back-deployed and needed no change: `@Entry`,
 `onGeometryChange(for:of:action:)`. Code already behind `#available(iOS 26, *)`
 (Liquid Glass materials and similar) needed no change either. On iOS 17 it
 takes its existing pre-iOS-26 fallback.
+
+### The async-closure crash (found on device)
+
+With `.tag()` fixed, the next build (`72ffd70`) still crashed when the main
+screen first appeared. It was the same `EXC_BAD_ACCESS` at `0x0` inside
+AttributeGraph's type-layout walk, but this time the return address pointed
+into a metadata accessor in the app itself. That accessor called
+`swift_getExtendedFunctionTypeMetadata`, a Swift runtime function that only
+exists in iOS 18+. It's weak-linked, so on iOS 17 it's a null pointer.
+
+Upstream enables the Swift 6.2 upcoming feature
+`NonisolatedNonsendingByDefault` in every package manifest and in the app
+target. Under it, every `async` closure type (`() async -> Void`,
+`@Sendable (CardID) async throws -> Void`, and so on) becomes
+`nonisolated(nonsending)`. The runtime can only describe that kind of type
+through the extended function type metadata. Views and `@DependencyClient`
+structs store dozens of those closures, so the app crashes the first time
+SwiftUI looks at them. The compiler gives no warning for an iOS 17 target.
+The binary had 54 call sites, 52 of them with the `nonsending` flag.
+
+Fix: `NonisolatedNonsendingByDefault` is removed from `Package.swift`,
+`AmgiFeatures/Package.swift`, `AmgiUI/Package.swift`,
+`AmgiReader/Package.swift` and `OTHER_SWIFT_FLAGS` in `AmgiApp/project.yml`.
+It has to be on everywhere or off everywhere, because it changes symbol
+mangling across the package ↔ app link boundary. With it off, a plain
+`nonisolated async` function runs on the global concurrent executor instead
+of the caller's actor, which was the standard Swift 6.0/6.1 behavior. The two
+functions upstream already marks `@concurrent` behave the same either way.
 
 ### Community fixes merged from open upstream PRs
 
