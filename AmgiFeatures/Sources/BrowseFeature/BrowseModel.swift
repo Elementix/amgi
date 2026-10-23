@@ -245,7 +245,7 @@ final class BrowseModel {
     /// them. These were `try?` per item, so in a multi-select batch an
     /// arbitrary subset could fail with zero feedback — the user believed
     /// 100 notes were deleted when some were not.
-    private func runBatch<ID>(
+    private func runBatch<ID: Sendable>(
         _ verb: String,
         over ids: [ID],
         _ work: (ID) async throws -> Void
