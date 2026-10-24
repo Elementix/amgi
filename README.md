@@ -58,7 +58,7 @@ upstream there.
 ## Status
 
 **The iOS 17 port works.** Release
-[`v0.2.0-ios17`](https://github.com/Elementix/amgi/releases/tag/v0.2.0-ios17)
+[`v0.2.1-ios17`](https://github.com/Elementix/amgi/releases/tag/v0.2.1-ios17)
 is the build that was tested on the device. It was confirmed on an iPhone 14
 Pro (iOS 17.0) to:
 
@@ -67,6 +67,7 @@ Pro (iOS 17.0) to:
 - ✅ show the main tab bar and screens without crashing
 - ✅ import AnkiWeb `.apkg` decks, both from **Library → ⋯ → Import Deck…**
   and from Safari/Files via **Share → Amgi**
+- ✅ import EPUBs (**Read → Import EPUB…**) and open them in the reader
 
 | | |
 |---|---|
