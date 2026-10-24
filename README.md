@@ -43,6 +43,9 @@ upstream there.
 - **Based on:** upstream `main` at `63440c5` ("Fix lots of layout issues with
   stats and heatmap", v0.2.0 build 7).
 - **Branch:** `ios17`. Every push to it builds an unsigned IPA on GitHub Actions.
+- **Compatibility:** iOS **17.0 or later** (the IPA's `MinimumOSVersion` is
+  17.0). It's meant for devices that are staying on iOS 17. It also installs
+  on iOS 18/26, but there it adds nothing over upstream.
 - **Target setup:** an iPhone 14 Pro on iOS 17.0, jailbroken, installing with
   TrollStore. Other iOS 17 devices should work the same way, but nobody has
   tested them.
@@ -52,19 +55,28 @@ upstream there.
 | | |
 |---|---|
 | Compiles for iOS 17 | ✅ [CI run 39648940425](https://github.com/Elementix/amgi/actions/runs/39648940425) (2026-10-21, commit `0166091`) built and packaged the unsigned IPA |
-| Tested on a real iOS 17 device | ✅ Build `0af7a29` launches, finishes onboarding and runs on an iPhone 14 Pro (iOS 17.0). The two earlier builds crashed entering the main screen (see [the `.tag()` crash](#the-tag-crash-found-on-device) and [the async-closure crash](#the-async-closure-crash-found-on-device)). Build `b9b34e8` imports `.apkg` decks via Share → Amgi. **Import Deck…** inside the app was then switched to a UIKit picker (see [Deck import](#deck-import)); waiting on a retest. |
+| Tested on a real iOS 17 device | ✅ Release [`v0.2.0-ios17`](https://github.com/Elementix/amgi/releases/tag/v0.2.0-ios17) (commit `64219bb` build) launches, finishes onboarding, imports `.apkg` decks (both **Import Deck…** and Share → Amgi) and studies on an iPhone 14 Pro (iOS 17.0). Earlier builds crashed entering the main screen (see [the `.tag()` crash](#the-tag-crash-found-on-device) and [the async-closure crash](#the-async-closure-crash-found-on-device)) or couldn't import from inside the app (see [Deck import](#deck-import)). |
+| iOS 17.1 – 17.x | ⚠️ Should work (same code paths as 17.0) but untested |
+| iOS 18 and later | ⚠️ Installs and uses upstream's original iOS 18 code paths, but this fork hasn't been tested there. On iOS 18+ you're better off with [upstream Amgi](https://github.com/antigluten/amgi). |
 | Apple Watch app | ❌ Not included (see [What's not included](#whats-not-included)) |
 
 ## Installing (TrollStore / sideloading)
 
-1. Open the [Actions tab](https://github.com/Elementix/amgi/actions), click the
-   latest successful **Build Unsigned IPA** run on `ios17`, and download
-   **AmgiApp-unsigned-ipa** from the Artifacts section. GitHub delivers it as a
-   `.zip` with the `.ipa` inside. Artifacts expire after **7 days**. To get a
-   fresh one, re-run the workflow (**Run workflow**, branch `ios17`).
-2. Unzip it and open `AmgiApp-unsigned.ipa` with **TrollStore**. Any other
-   sideloading tool (AltStore, Sideloadly, …) works as well. Those re-sign the
-   app with your Apple ID.
+1. Download `AmgiApp-unsigned.ipa` from the
+   [latest release](https://github.com/Elementix/amgi/releases/latest). The
+   release page also lists its SHA-256.
+2. Install it:
+   - **TrollStore** (iOS 17.0 on supported devices): open the `.ipa` with
+     TrollStore. It installs permanently, and updates install over the
+     top without losing your decks.
+   - **AltStore / Sideloadly / similar** (any iOS 17+ device): sign it with
+     your Apple ID. A free Apple ID install expires after 7 days. A paid
+     developer account lasts a year.
+
+Newer, untested builds of `ios17` are under the
+[Actions tab](https://github.com/Elementix/amgi/actions). Open the latest
+successful **Build Unsigned IPA** run and download **AmgiApp-unsigned-ipa**
+(a `.zip` with the `.ipa` inside, kept for 7 days).
 
 The IPA is **unsigned** and has **no entitlements** embedded, because CI builds
 it with code signing turned off. See [Known differences](#known-differences-on-ios-17)
@@ -237,8 +249,11 @@ inside an imported `.apkg` is unaffected by #19.
   engine is cross-compiled for the iPhone's ARM chip either way. The time
   limit went from 60 to 120 minutes because Intel runners are slower, and the
   Rust cache key now includes the CPU architecture.
+- The release notes template mentions TrollStore alongside AltStore/Sideloadly
+  and says the build needs iOS 17.0+.
 - Everything else matches upstream: Xcode 26.3, Rust 1.95, unsigned archive,
-  and an IPA uploaded as a 7-day artifact.
+  an IPA uploaded as a 7-day artifact, and a GitHub Release with the IPA when a
+  `v*` tag is pushed.
 
 ## Known differences on iOS 17
 

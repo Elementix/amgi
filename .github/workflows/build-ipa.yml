@@ -269,16 +269,13 @@ jobs:
 
           ---
 
-          Unsigned iOS IPA build. Sign locally with [AltStore](https://altstore.io/) or [Sideloadly](https://sideloadly.io/) using your own Apple ID.
+          Unsigned iOS IPA build for **iOS 17.0 and later**.
 
           ### Install
 
           1. Download \`AmgiApp-unsigned.ipa\` from this release.
-          2. Open AltStore or Sideloadly on your computer.
-          3. Drag the IPA into the tool and sign with your Apple ID.
-          4. Install on your device.
-
-          Free Apple IDs: install lasts 7 days. Paid Apple Developer Program: 1 year.
+          2. **TrollStore:** open the IPA with TrollStore. It installs permanently, and updates keep your decks.
+          3. **Or sign it yourself** with [AltStore](https://altstore.io/) or [Sideloadly](https://sideloadly.io/) using your Apple ID. A free Apple ID install lasts 7 days, a paid Apple Developer Program install 1 year.
 
           ### Verify
 
