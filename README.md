@@ -13,6 +13,11 @@
   <img src="https://img.shields.io/badge/Swift-6.2-F05138?logo=swift&logoColor=white" alt="Swift 6.2">
   <img src="https://img.shields.io/badge/Rust-FFI-DEA584?logo=rust&logoColor=white" alt="Rust FFI">
   <img src="https://img.shields.io/badge/License-AGPL--3.0-blue" alt="AGPL-3.0">
+  <a href="https://github.com/Elementix/amgi/releases/latest"><img src="https://img.shields.io/github/v/release/Elementix/amgi?label=release" alt="Latest release"></a>
+</p>
+
+<p align="center">
+  <strong>✅ Working on iOS 17.</strong> <a href="https://github.com/Elementix/amgi/releases/latest/download/AmgiApp-unsigned.ipa">Download the IPA</a> · <a href="#installing-trollstore--sideloading">Install</a> · <a href="#getting-decks-in-eg-ankiweb-shared-decks">Import decks</a>
 </p>
 
 ---
@@ -46,19 +51,35 @@ upstream there.
 - **Compatibility:** iOS **17.0 or later** (the IPA's `MinimumOSVersion` is
   17.0). It's meant for devices that are staying on iOS 17. It also installs
   on iOS 18/26, but there it adds nothing over upstream.
-- **Target setup:** an iPhone 14 Pro on iOS 17.0, jailbroken, installing with
+- **Tested on:** an iPhone 14 Pro on iOS 17.0, jailbroken, installed with
   TrollStore. Other iOS 17 devices should work the same way, but nobody has
-  tested them.
+  tested them yet.
 
 ## Status
 
+**The iOS 17 port works.** Release
+[`v0.2.0-ios17`](https://github.com/Elementix/amgi/releases/tag/v0.2.0-ios17)
+is the build that was tested on the device. It was confirmed on an iPhone 14
+Pro (iOS 17.0) to:
+
+- ✅ install with TrollStore and launch
+- ✅ run the onboarding flow and open a local collection (**Use Locally**)
+- ✅ show the main tab bar and screens without crashing
+- ✅ import AnkiWeb `.apkg` decks, both from **Library → ⋯ → Import Deck…**
+  and from Safari/Files via **Share → Amgi**
+
 | | |
 |---|---|
-| Compiles for iOS 17 | ✅ [CI run 39648940425](https://github.com/Elementix/amgi/actions/runs/39648940425) (2026-10-21, commit `0166091`) built and packaged the unsigned IPA |
-| Tested on a real iOS 17 device | ✅ Release [`v0.2.0-ios17`](https://github.com/Elementix/amgi/releases/tag/v0.2.0-ios17) (commit `64219bb` build) launches, finishes onboarding, imports `.apkg` decks (both **Import Deck…** and Share → Amgi) and studies on an iPhone 14 Pro (iOS 17.0). Earlier builds crashed entering the main screen (see [the `.tag()` crash](#the-tag-crash-found-on-device) and [the async-closure crash](#the-async-closure-crash-found-on-device)) or couldn't import from inside the app (see [Deck import](#deck-import)). |
-| iOS 17.1 – 17.x | ⚠️ Should work (same code paths as 17.0) but untested |
-| iOS 18 and later | ⚠️ Installs and uses upstream's original iOS 18 code paths, but this fork hasn't been tested there. On iOS 18+ you're better off with [upstream Amgi](https://github.com/antigluten/amgi). |
+| iOS 17.0 | ✅ Tested on device |
+| iOS 17.1 – 17.x | Should work (same code paths as 17.0), not tested yet |
+| iOS 18 and later | Installs and runs upstream's original iOS 18 code paths. Not tested with this fork. On iOS 18+ you're better off with [upstream Amgi](https://github.com/antigluten/amgi). |
 | Apple Watch app | ❌ Not included (see [What's not included](#whats-not-included)) |
+| CI | ✅ Builds an unsigned IPA on every push to `ios17` ([latest runs](https://github.com/Elementix/amgi/actions)) |
+
+Getting there took three on-device fixes, all described below: the
+[`.tag()` crash](#the-tag-crash-found-on-device), the
+[async-closure crash](#the-async-closure-crash-found-on-device), and
+[deck import](#deck-import).
 
 ## Installing (TrollStore / sideloading)
 
@@ -73,7 +94,7 @@ upstream there.
      your Apple ID. A free Apple ID install expires after 7 days. A paid
      developer account lasts a year.
 
-Newer, untested builds of `ios17` are under the
+Builds of `ios17` newer than the release (not device-tested) are under the
 [Actions tab](https://github.com/Elementix/amgi/actions). Open the latest
 successful **Build Unsigned IPA** run and download **AmgiApp-unsigned-ipa**
 (a `.zip` with the `.ipa` inside, kept for 7 days).
