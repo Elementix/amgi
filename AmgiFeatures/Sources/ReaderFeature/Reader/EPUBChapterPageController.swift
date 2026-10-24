@@ -68,6 +68,11 @@ final class EPUBChapterPageController: UIViewController {
     weak var pageDelegate: (any EPUBChapterPageControllerDelegate)?
 
     private var webView: WKWebView!
+    /// The native pager. It, not the page's JS, is the source of truth for
+    /// the current page: on iOS 17 `document.documentElement.scrollLeft`
+    /// stays 0 while this scroll view pages, so JS-computed indices snapped
+    /// the counter back to page 1 after every turn.
+    fileprivate var scrollView: UIScrollView { webView.scrollView }
     private var bridge: ScriptBridge!
     /// Last viewport size pushed to CSS. Used to detect real layout
     /// changes (rotation, safe-area updates) so we don't trigger a
@@ -215,6 +220,7 @@ final class EPUBChapterPageController: UIViewController {
                     CGPoint(x: min(target, maxX), y: 0),
                     animated: false
                 )
+                self.bridge.emitPageInfo(self.webView.scrollView)
             }
         }
     }
@@ -318,21 +324,33 @@ final class EPUBChapterPageController: UIViewController {
         // column count `__amgiRelayout` computes is final and the scroll
         // target is meaningful. The old fixed delay silently restored the
         // wrong position whenever layout took longer than that.
+        // The offset itself is set on the native scroll view (see
+        // `scrollView`); JS scrolling doesn't move it on iOS 17.
         let js = """
-        (function() {
-          requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-              if (typeof window.__amgiRelayout === 'function') { window.__amgiRelayout(); }
-              if (typeof window.__amgiScrollToFraction === 'function') {
-                window.__amgiScrollToFraction(\(fraction));
-              }
-            });
-          });
-        })();
+        await new Promise(function(resolve) {
+          requestAnimationFrame(function() { requestAnimationFrame(resolve); });
+        });
+        if (typeof window.__amgiRelayout === 'function') { window.__amgiRelayout(); }
+        return 0;
         """
-        webView.evaluateJavaScript(js) { _, error in
-            if let error { Log.reader.error("scrollToFraction script failed: \(error)") }
+        webView.callAsyncJavaScript(js, arguments: [:], in: nil, in: .page) { [weak self] result in
+            if case .failure(let error) = result {
+                Log.reader.error("restore layout script failed: \(error)")
+            }
+            // Next tick, so the relayout's contentSize reaches the scroll view.
+            DispatchQueue.main.async { self?.scrollToFraction(fraction) }
         }
+    }
+
+    /// Inverse of the saved fraction (`pageIndex / (pageCount - 1)`).
+    private func scrollToFraction(_ fraction: Double) {
+        let scroll = webView.scrollView
+        let viewport = scroll.bounds.width
+        guard viewport > 0 else { return }
+        let pageCount = max(1, Int(round(scroll.contentSize.width / viewport)))
+        let index = min(pageCount - 1, max(0, Int(round(fraction * Double(pageCount - 1)))))
+        scroll.setContentOffset(CGPoint(x: CGFloat(index) * viewport, y: 0), animated: false)
+        bridge.emitPageInfo(scroll)
     }
 
 }
@@ -446,6 +464,10 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler, WKNavigationDelegate
         if !decelerate { emitPageInfo(scrollView) }
     }
 
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        emitPageInfo(scrollView)
+    }
+
     // MARK: Empty-tap recogniser
 
     @objc
@@ -472,18 +494,20 @@ private extension ScriptBridge {
         switch name {
         case "pageInfo":
             guard let dict = body as? [String: Any],
-                  let pageIndex = dict["pageIndex"] as? Int,
                   let pageCount = dict["pageCount"] as? Int else { return }
+            // JS's pageIndex is unreliable on iOS 17 (see `scrollView`).
+            let pageIndex = nativePageIndex(owner.scrollView)
             owner.pageDelegate?.epubChapter(owner, didReportPageInfoIndex: pageIndex, pageCount: pageCount)
         case "progress":
-            // progress events only update the progress fraction.
             // UIScrollViewDelegate (emitPageInfo) is the single source of
-            // truth for pageIndex / pageCount — emitting them from here
-            // too caused the host counter to flicker during a swipe.
-            guard let dict = body as? [String: Any],
-                  let pageIndex = dict["pageIndex"] as? Int,
-                  let fraction = dict["progressFraction"] as? Double else { return }
-            owner.pageDelegate?.epubChapter(owner, didReportProgressFraction: fraction, pageIndex: pageIndex)
+            // truth for pageIndex / pageCount, and already reports progress
+            // at the end of every turn. JS's own index reads 0 on iOS 17
+            // (see `scrollView`), so its report would snap the counter back
+            // to page 1 and save the wrong position. Re-read the scroll view
+            // instead, unless a gesture is still in flight.
+            let scroll = owner.scrollView
+            guard !scroll.isDragging, !scroll.isDecelerating else { return }
+            emitPageInfo(scroll)
         case "wordTap":
             guard let dict = body as? [String: Any] else { return }
             let token = (dict["token"] as? String) ?? ""
@@ -495,10 +519,15 @@ private extension ScriptBridge {
         }
     }
 
+    func nativePageIndex(_ scrollView: UIScrollView) -> Int {
+        let viewport = max(1, scrollView.bounds.width)
+        return Int(round(scrollView.contentOffset.x / viewport))
+    }
+
     func emitPageInfo(_ scrollView: UIScrollView) {
         guard let owner else { return }
         let viewport = max(1, scrollView.bounds.width)
-        let pageIndex = Int(round(scrollView.contentOffset.x / viewport))
+        let pageIndex = nativePageIndex(scrollView)
         let totalPages = max(1, Int(round(scrollView.contentSize.width / viewport)))
         owner.pageDelegate?.epubChapter(owner, didReportPageInfoIndex: pageIndex, pageCount: totalPages)
         let denom = Double(max(1, totalPages - 1))

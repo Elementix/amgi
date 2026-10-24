@@ -27,6 +27,7 @@ struct ReaderLibraryContent: View {
     let onImport: () -> Void
     let onConfigure: () -> Void
     let onRetry: () -> Void
+    var onDelete: (ReaderBook) -> Void = { _ in }
 
     var body: some View {
         switch state {
@@ -83,12 +84,27 @@ private extension ReaderLibraryContent {
     func shelf(_ data: ReaderLibraryViewData) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                ContinueReadingSection(items: data.continueReading, bookForId: bookForId, progress: progress)
-                AllBooksSection(items: data.allBooks, bookForId: bookForId, progress: progress)
+                ContinueReadingSection(items: data.continueReading, bookForId: bookForId, progress: progress, onDelete: onDelete)
+                AllBooksSection(items: data.allBooks, bookForId: bookForId, progress: progress, onDelete: onDelete)
                 ImportBookCTA(action: onImport)
                 Color.clear.frame(height: 8)
             }
             .padding(.top, 8)
+        }
+    }
+}
+
+extension View {
+    /// Long-press "Delete Book" for imported EPUBs. Books that come from an
+    /// Anki deck belong to the collection and are not offered here.
+    @ViewBuilder
+    func deleteBookContextMenu(_ book: ReaderBook, onDelete: @escaping (ReaderBook) -> Void) -> some View {
+        if case .epub = book.source {
+            contextMenu {
+                Button("Delete Book", systemImage: "trash", role: .destructive) { onDelete(book) }
+            }
+        } else {
+            self
         }
     }
 }

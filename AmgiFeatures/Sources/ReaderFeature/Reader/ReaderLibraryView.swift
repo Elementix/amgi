@@ -53,6 +53,7 @@ package struct ReaderLibraryView: View {
     @State private var searchText: String = ""
     @State private var isImporting: Bool = false
     @State private var showConfiguration: Bool = false
+    @State private var bookToDelete: ReaderBook?
     @FocusState private var searchFocused: Bool
 
     package init(refreshID: UUID? = nil) {
@@ -85,7 +86,8 @@ package struct ReaderLibraryView: View {
             progress: model.progress,
             onImport: { isImporting = true },
             onConfigure: { showConfiguration = true },
-            onRetry: { model.startReload(searchText: searchText, sortMode: sortMode) }
+            onRetry: { model.startReload(searchText: searchText, sortMode: sortMode) },
+            onDelete: { bookToDelete = $0 }
         )
         .navigationTitle("Library")
         .navigationBarTitleDisplayMode(.large)
@@ -117,6 +119,18 @@ package struct ReaderLibraryView: View {
             allowsMultipleSelection: true
         ) { urls in
             handleImport(result: .success(urls))
+        }
+        .confirmationDialog(
+            "Delete \"\(bookToDelete?.title ?? "")\"?",
+            isPresented: Binding(get: { bookToDelete != nil }, set: { if !$0 { bookToDelete = nil } }),
+            titleVisibility: .visible,
+            presenting: bookToDelete
+        ) { book in
+            Button("Delete Book", role: .destructive) {
+                Task { await model.deleteEPUB(book, searchText: searchText, sortMode: sortMode) }
+            }
+        } message: { _ in
+            Text("The imported EPUB is removed from this device. You can import it again later.")
         }
         .alert("Import failed", isPresented: Binding(
             get: { model.importError != nil },

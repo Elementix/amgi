@@ -148,4 +148,14 @@ final class ReaderLibraryModel {
             startReload(searchText: searchText, sortMode: sortMode)
         }
     }
+
+    /// Removes an imported EPUB (its extracted files and index entry).
+    func deleteEPUB(_ book: ReaderBook, searchText: String, sortMode: BookshelfSortMode) async {
+        do {
+            try await epubLibraryClient.deleteBook(book.id)
+        } catch {
+            importError = error.localizedDescription
+        }
+        startReload(searchText: searchText, sortMode: sortMode)
+    }
 }

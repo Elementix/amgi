@@ -13,6 +13,7 @@ struct AllBooksSection: View {
     let items: [BookCellItem]
     let bookForId: (String) -> ReaderBook?
     let progress: ReaderProgressCoordinator
+    let onDelete: (ReaderBook) -> Void
 
     private let columns: [GridItem] = Array(
         repeating: GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 14, alignment: .top),
@@ -43,6 +44,7 @@ struct AllBooksSection: View {
                         }
                         .buttonStyle(.pressScale)
                         .coverZoomSource(id: item.id, in: coverTransition)
+                        .deleteBookContextMenu(book, onDelete: onDelete)
                     } else {
                         AllBooksCell(item: item)
                     }

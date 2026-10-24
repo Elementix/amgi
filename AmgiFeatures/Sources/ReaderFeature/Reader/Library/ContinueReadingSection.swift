@@ -13,6 +13,7 @@ struct ContinueReadingSection: View {
     let items: [ContinueReadingItem]
     let bookForId: (String) -> ReaderBook?
     let progress: ReaderProgressCoordinator
+    let onDelete: (ReaderBook) -> Void
 
     @Environment(\.palette) private var palette
     /// See `AllBooksSection` — the detail push grows from the tapped card.
@@ -38,6 +39,7 @@ struct ContinueReadingSection: View {
                                 }
                                 .buttonStyle(.pressScale)
                                 .coverZoomSource(id: item.id, in: coverTransition)
+                                .deleteBookContextMenu(book, onDelete: onDelete)
                             } else {
                                 ContinueReadingCard(item: item)
                             }
