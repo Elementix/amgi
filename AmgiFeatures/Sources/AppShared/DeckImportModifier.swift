@@ -21,20 +21,11 @@ private struct DeckImportModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            // A UIKit picker rather than `.fileImporter`: on iOS 17 the
-            // Reader's importers in the same tree swallow the selection (see
-            // DeckDocumentPicker). It allows any file (`.item`) so a
-            // downloaded `.apkg` is never greyed out; the backend rejects
-            // anything that isn't a package.
-            .sheet(isPresented: $isPresented) {
-                DeckDocumentPicker(
-                    onPick: { url in
-                        isPresented = false
-                        handleImport(.success(url), removeAfterwards: true)
-                    },
-                    onCancel: { isPresented = false }
-                )
-                .ignoresSafeArea()
+            // A UIKit picker rather than `.fileImporter` (see DocumentPicker).
+            // It allows any file (`.item`) so a downloaded `.apkg` is never
+            // greyed out; the backend rejects anything that isn't a package.
+            .documentPicker(isPresented: $isPresented, contentTypes: [.item]) { urls in
+                handleImport(.success(urls[0]), removeAfterwards: true)
             }
             .onChange(of: openedFile) { _, url in
                 guard let url else { return }

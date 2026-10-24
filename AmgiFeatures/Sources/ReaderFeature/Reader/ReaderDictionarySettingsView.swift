@@ -9,6 +9,7 @@ import Reader
 import ReaderDictionary
 import Theme
 import AppCore
+import AppShared
 import Dependencies
 import Sharing
 package import SwiftUI
@@ -144,12 +145,14 @@ package struct ReaderDictionarySettingsView: View {
                 EditButton()
             }
         }
-        .fileImporter(
+        // UIKit picker, not `.fileImporter`: on iOS 17 the selection never
+        // arrived here (see AppShared's DocumentPicker).
+        .documentPicker(
             isPresented: $showImporter,
-            allowedContentTypes: [Self.zipType],
+            contentTypes: [Self.zipType],
             allowsMultipleSelection: true
-        ) { result in
-            model.handleImport(result)
+        ) { urls in
+            model.handleImport(.success(urls))
         }
         .alert(
             "Dictionary",

@@ -7,6 +7,7 @@
 
 import Reader
 import AppCore
+import AppShared
 import Sharing
 import Theme
 package import SwiftUI
@@ -108,12 +109,14 @@ package struct ReaderLibraryView: View {
                 }
             }
         }
-        .fileImporter(
+        // UIKit picker, not `.fileImporter`: on iOS 17 the selection never
+        // arrived here (see AppShared's DocumentPicker).
+        .documentPicker(
             isPresented: $isImporting,
-            allowedContentTypes: [UTType(filenameExtension: "epub") ?? .data],
+            contentTypes: [UTType(filenameExtension: "epub") ?? .data],
             allowsMultipleSelection: true
-        ) { result in
-            handleImport(result: result)
+        ) { urls in
+            handleImport(result: .success(urls))
         }
         .alert("Import failed", isPresented: Binding(
             get: { model.importError != nil },

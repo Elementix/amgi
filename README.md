@@ -223,14 +223,16 @@ functions upstream already marks `@concurrent` behave the same either way.
 
 ### Deck import
 
-On iOS 17, picking an `.apkg` in **Import Deck…** did nothing, and the app
-wasn't offered for `.apkg` files elsewhere. Four changes:
+On iOS 17, picking a file in **Import Deck…**, **Import EPUB…** or the
+dictionary importer did nothing, and the app wasn't offered for `.apkg` files
+elsewhere. The changes:
 
 | Where | Change |
 |---|---|
 | `AmgiApp/Info.plist` | Declares `net.ankiweb.apkg` / `net.ankiweb.colpkg` (`UTImportedTypeDeclarations`) and registers Amgi as an alternate viewer for them (`CFBundleDocumentTypes`), so iOS recognizes the files and offers **Amgi** in Share / "Open in…" from Safari and Files. Upstream had no document types. |
 | `RootFeature/RootView.swift`, `AppShared/DeckImportModifier.swift` | `onOpenURL` now passes file URLs to the deck importer, so "Open in Amgi" imports directly. The copy iOS places in `Documents/Inbox` is deleted afterwards. |
-| `AppShared/DeckImportModifier.swift` + new `AppShared/DeckDocumentPicker.swift` | **Import Deck…** now presents a UIKit `UIDocumentPickerViewController` (copy mode) in a sheet instead of SwiftUI's `.fileImporter`. On iOS 17 the picker opened, but the chosen file never reached the deck importer, because the Reader's EPUB and dictionary `.fileImporter`s in the same view tree took it. It allows any file (`.item` instead of `.data`), so downloaded `.apkg`s are never greyed out. The extension check was removed and the Anki engine now rejects files that aren't packages. Error alerts wait for the picker to finish dismissing, because iOS 17 drops an alert presented during that animation. |
+| `AppShared/DeckImportModifier.swift` + new `AppShared/DocumentPicker.swift` | **Import Deck…** now presents a UIKit `UIDocumentPickerViewController` (copy mode) in a sheet, through a new `documentPicker(isPresented:contentTypes:allowsMultipleSelection:onPick:)` modifier, instead of SwiftUI's `.fileImporter`. On iOS 17 the picker opened, but the chosen file never reached the importer that presented it. It allows any file (`.item` instead of `.data`), so downloaded `.apkg`s are never greyed out. The extension check was removed and the Anki engine now rejects files that aren't packages. Error alerts wait for the picker to finish dismissing, because iOS 17 drops an alert presented during that animation. |
+| `ReaderFeature/Reader/ReaderLibraryView.swift`, `ReaderDictionarySettingsView.swift` | The same `.fileImporter` problem broke **Import EPUB…** (the file could be selected but was never imported) and the dictionary `.zip` importer. Both now use `documentPicker(...)` with their original file types and multi-select. No SwiftUI `.fileImporter` is left in the iPhone app. |
 | `AppShared/ImportHelper.swift` | No longer fails with "Cannot access the selected file" when `startAccessingSecurityScopedResource()` returns `false`. That's normal for non-scoped files and for an unsandboxed TrollStore install. Only a successful call is balanced with `stop…`. |
 
 ### Community fixes merged from open upstream PRs
