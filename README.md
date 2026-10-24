@@ -58,7 +58,7 @@ upstream there.
 ## Status
 
 **The iOS 17 port works.** Release
-[`v0.2.1-ios17`](https://github.com/Elementix/amgi/releases/tag/v0.2.1-ios17)
+[`v0.2.2-ios17`](https://github.com/Elementix/amgi/releases/tag/v0.2.2-ios17)
 is the build that was tested on the device. It was confirmed on an iPhone 14
 Pro (iOS 17.0) to:
 
@@ -67,7 +67,8 @@ Pro (iOS 17.0) to:
 - ✅ show the main tab bar and screens without crashing
 - ✅ import AnkiWeb `.apkg` decks, both from **Library → ⋯ → Import Deck…**
   and from Safari/Files via **Share → Amgi**
-- ✅ import EPUBs (**Read → Import EPUB…**) and open them in the reader
+- ✅ import EPUBs (**Read → Import EPUB…**), read them with a correct page
+  counter and saved position, and delete them (long-press a cover)
 
 | | |
 |---|---|
@@ -235,6 +236,13 @@ elsewhere. The changes:
 | `AppShared/DeckImportModifier.swift` + new `AppShared/DocumentPicker.swift` | **Import Deck…** now presents a UIKit `UIDocumentPickerViewController` (copy mode) in a sheet, through a new `documentPicker(isPresented:contentTypes:allowsMultipleSelection:onPick:)` modifier, instead of SwiftUI's `.fileImporter`. On iOS 17 the picker opened, but the chosen file never reached the importer that presented it. It allows any file (`.item` instead of `.data`), so downloaded `.apkg`s are never greyed out. The extension check was removed and the Anki engine now rejects files that aren't packages. Error alerts wait for the picker to finish dismissing, because iOS 17 drops an alert presented during that animation. |
 | `ReaderFeature/Reader/ReaderLibraryView.swift`, `ReaderDictionarySettingsView.swift` | The same `.fileImporter` problem broke **Import EPUB…** (the file could be selected but was never imported) and the dictionary `.zip` importer. Both now use `documentPicker(...)` with their original file types and multi-select. No SwiftUI `.fileImporter` is left in the iPhone app. |
 | `AppShared/ImportHelper.swift` | No longer fails with "Cannot access the selected file" when `startAccessingSecurityScopedResource()` returns `false`. That's normal for non-scoped files and for an unsandboxed TrollStore install. Only a successful call is balanced with `stop…`. |
+
+### EPUB reader
+
+| Where | Change |
+|---|---|
+| `ReaderFeature/Reader/EPUBChapterPageController.swift` | The page counter showed the right page for a moment after each turn, then went back to 1. The injected JS reported a page index from `document.documentElement.scrollLeft` 250 ms after scrolling, and on iOS 17 that value stays 0 while the WKWebView's native scroll view does the paging. The same wrong index was saved as reading progress. Now the native scroll view is the only source of the page index and saved progress. Restoring a saved position sets the scroll view's offset directly (after the page's layout settles), and edge-tap page turns report the page when their animation finishes. |
+| `ReaderFeature/Reader/Library/*`, `ReaderLibraryView.swift` | Upstream had no way to remove an imported EPUB. Long-pressing an EPUB cover in **Continue Reading** or **All Books** now offers **Delete Book**, with a confirmation. It uses the existing `EPUBLibraryClient.deleteBook`. Books from an Anki deck aren't offered, because they belong to the collection. |
 
 ### Community fixes merged from open upstream PRs
 
